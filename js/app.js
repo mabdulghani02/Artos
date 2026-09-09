@@ -631,7 +631,7 @@ if (btnSimpanJasaTransfer) {
 }
 
 // ==========================================
-// 13. KONSULTAN FINANSIAL AI (GEMINI DENGAN FALLBACK)
+// 13. KONSULTAN FINANSIAL AI (DETEKSI MODEL OTOMATIS)
 // ==========================================
 const btnKonsultasiGemini = document.getElementById('btnKonsultasiGemini');
 if (btnKonsultasiGemini) {
@@ -646,7 +646,7 @@ if (btnKonsultasiGemini) {
     const boxAI = document.getElementById('wadahResponAI');
     if (!boxAI) return;
     boxAI.style.display = 'block';
-    boxAI.innerHTML = '<i>Sedang menghubungi peladen Gemini dan menganalisis siklus finansial...</i>';
+    boxAI.innerHTML = '<i>Sedang memeriksa model aktif di Google AI Studio...</i>';
 
     const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
     const hutang = bacaData('artos_hutang', []).filter(h => !h.lunas);
@@ -661,47 +661,63 @@ if (btnKonsultasiGemini) {
       kuotaHarianFleksibel: batasHarianDinamis
     };
 
-    const teksInstruksi = "Peran Anda adalah Artos AI, konsultan keuangan pribadi cerdas. Analisis data keuangan berikut. Berikan evaluasi anggaran, strategi melunasi utang bila ada, dan saran penghematan harian dalam 2-3 paragraf padat bernas:";
+    const teksInstruksi = "Peran Anda adalah Artos AI, konsultan keuangan pribadi cerdas. Evaluasi data keuangan berikut. Berikan evaluasi anggaran, strategi melunasi utang bila ada, dan saran penghematan harian dalam 2-3 paragraf padat bernas:";
 
-    // Daftar model aktif Google AI Studio (diurutkan dari model terandal)
-    const modelCandidates = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite'];
-    let hasilTeks = null;
-    let pesanErrorTerakhir = '';
+    try {
+      // 1. Ambil daftar model yang tersedia untuk API Key ini
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const listData = await listRes.json();
 
-    for (const modelName of modelCandidates) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: `${teksInstruksi}\n\n${JSON.stringify(promptData)}` }
-                ]
-              }
-            ]
-          })
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-          hasilTeks = data.candidates[0].content.parts[0].text;
-          break; // Berhasil mendapatkan balasan
-        } else {
-          pesanErrorTerakhir = data.error ? `${data.error.message} (${data.error.code || res.status})` : `Status ${res.status}`;
-        }
-      } catch (err) {
-        pesanErrorTerakhir = err.message;
+      if (!listRes.ok) {
+        const errPesan = listData.error ? listData.error.message : 'Kunci API tidak valid';
+        boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat Kunci (${listRes.status}):</b> ${errPesan}</span>`;
+        return;
       }
-    }
 
-    if (hasilTeks) {
-      boxAI.innerText = hasilTeks;
-    } else {
-      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat API:</b> ${pesanErrorTerakhir}. Pastikan kunci API Anda aktif di Google AI Studio.</span>`;
+      // Cari model yang mendukung generateContent (prioritas flash)
+      const models = listData.models || [];
+      const usableModels = models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'));
+
+      let targetModel = usableModels.find(m => m.name.includes('flash')) || usableModels[0];
+
+      if (!targetModel) {
+        boxAI.innerHTML = `<span style="color:#b91c1c;">Tidak ada model text generation yang tersedia untuk akun ini.</span>`;
+        return;
+      }
+
+      const modelEndpoint = targetModel.name; // Berisi 'models/...'
+      boxAI.innerHTML = `<i>Menganalisis keuangan menggunakan ${targetModel.displayName || modelEndpoint}...</i>`;
+
+      // 2. Eksekusi permintaan analisis ke model yang valid
+      const generateRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelEndpoint}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: `${teksInstruksi}\n\n${JSON.stringify(promptData)}` }
+              ]
+            }
+          ]
+        })
+      });
+
+      const data = await generateRes.json();
+
+      if (!generateRes.ok) {
+        const pesanGalat = data.error ? data.error.message : 'Gagal menghasilkan konten.';
+        boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat Model (${generateRes.status}):</b> ${pesanGalat}</span>`;
+        return;
+      }
+
+      if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+        boxAI.innerText = data.candidates[0].content.parts[0].text;
+      } else {
+        boxAI.innerHTML = `<span style="color:#b91c1c;">Respon dari AI kosong atau format tidak dikenali.</span>`;
+      }
+    } catch (err) {
+      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Kendala Koneksi:</b> ${err.message}. Pastikan koneksi internet ponsel stabil.</span>`;
     }
   });
 }
