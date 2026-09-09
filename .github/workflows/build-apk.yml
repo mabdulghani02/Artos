@@ -39,13 +39,169 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Pasang Komponen Widget Android
+        run: |
+          node -e '
+          const fs = require("fs");
+
+          // 1. Buat folder tata letak dan konfigurasi xml
+          fs.mkdirSync("android/app/src/main/res/layout", { recursive: true });
+          fs.mkdirSync("android/app/src/main/res/xml", { recursive: true });
+
+          // 2. Buat berkas desain tata letak widget
+          const layoutXml = `<?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="14dp"
+              android:background="#f4fbf7">
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+                  <TextView
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:text="ARTOS FINANSIAL"
+                      android:textColor="#163022"
+                      android:textStyle="bold"
+                      android:textSize="13sp" />
+                  <TextView
+                      android:id="@+id/tvWidgetSisaLimit"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="Limit: Rp 50.000"
+                      android:textColor="#2d6a4f"
+                      android:textStyle="bold"
+                      android:textSize="12sp" />
+              </LinearLayout>
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:layout_marginTop="10dp"
+                  android:layout_marginBottom="12dp">
+                  <TextView
+                      android:id="@+id/tvWidgetTunai"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:text="Tunai:\\nRp 0"
+                      android:textColor="#334155"
+                      android:textSize="11sp" />
+                  <TextView
+                      android:id="@+id/tvWidgetGopay"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:text="GoPay:\\nRp 0"
+                      android:textColor="#334155"
+                      android:textSize="11sp" />
+                  <TextView
+                      android:id="@+id/tvWidgetMandiri"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:text="Mandiri:\\nRp 0"
+                      android:textColor="#334155"
+                      android:textSize="11sp" />
+              </LinearLayout>
+
+              <Button
+                  android:id="@+id/btnWidgetInputCepat"
+                  android:layout_width="match_parent"
+                  android:layout_height="38dp"
+                  android:text="+ Catat Transaksi"
+                  android:textColor="#ffffff"
+                  android:background="#2d6a4f"
+                  android:textSize="12sp" />
+          </LinearLayout>`;
+          fs.writeFileSync("android/app/src/main/res/layout/widget_artos.xml", layoutXml);
+
+          // 3. Buat berkas metadata widget
+          const infoXml = `<?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+              android:minWidth="280dp"
+              android:minHeight="110dp"
+              android:updatePeriodMillis="1800000"
+              android:initialLayout="@layout/widget_artos"
+              android:resizeMode="horizontal|vertical"
+              android:widgetCategory="home_screen">
+          </appwidget-provider>`;
+          fs.writeFileSync("android/app/src/main/res/xml/artos_widget_info.xml", infoXml);
+
+          // 4. Buat berkas kelas Java Provider
+          const javaDir = "android/app/src/main/java/com/artos/finance";
+          fs.mkdirSync(javaDir, { recursive: true });
+
+          const providerJava = `package com.artos.finance;
+
+          import android.app.PendingIntent;
+          import android.appwidget.AppWidgetManager;
+          import android.appwidget.AppWidgetProvider;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.widget.RemoteViews;
+
+          public class ArtosWidgetProvider extends AppWidgetProvider {
+              @Override
+              public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+                  SharedPreferences pref = context.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+                  String tunai = pref.getString("artos_saldo_tunai", "0");
+                  String gopay = pref.getString("artos_saldo_gopay", "0");
+                  String mandiri = pref.getString("artos_saldo_mandiri", "0");
+                  String limit = pref.getString("artos_sisa_limit", "50.000");
+
+                  for (int appWidgetId : appWidgetIds) {
+                      RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_artos);
+                      views.setTextViewText(R.id.tvWidgetTunai, "Tunai:\\nRp " + tunai);
+                      views.setTextViewText(R.id.tvWidgetGopay, "GoPay:\\nRp " + gopay);
+                      views.setTextViewText(R.id.tvWidgetMandiri, "Mandiri:\\nRp " + mandiri);
+                      views.setTextViewText(R.id.tvWidgetSisaLimit, "Limit: Rp " + limit);
+
+                      Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+                      if (intent != null) {
+                          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                          PendingIntent pendingIntent = PendingIntent.getActivity(
+                              context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                          );
+                          views.setOnClickPendingIntent(R.id.btnWidgetInputCepat, pendingIntent);
+                      }
+                      appWidgetManager.updateAppWidget(appWidgetId, views);
+                  }
+              }
+          }`;
+          fs.writeFileSync(javaDir + "/ArtosWidgetProvider.java", providerJava);
+
+          // 5. Daftarkan receiver ke dalam AndroidManifest.xml
+          const manifestPath = "android/app/src/main/AndroidManifest.xml";
+          let manifest = fs.readFileSync(manifestPath, "utf8");
+          const receiverTag = `
+                  <receiver android:name=".ArtosWidgetProvider" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                      </intent-filter>
+                      <meta-data
+                          android:name="android.appwidget.provider"
+                          android:resource="@xml/artos_widget_info" />
+                  </receiver>
+              </application>`;
+          manifest = manifest.replace("</application>", receiverTag);
+          fs.writeFileSync(manifestPath, manifest);
+          '
+
       - name: Kompilasi APK dengan Gradle
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Unggah Artefak APK
+      - name: Unggah Artefak APK Siap Unduh
         uses: actions/upload-artifact@v4
         with:
           name: Artos-Finansial-Debug-APK
