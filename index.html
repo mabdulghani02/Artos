@@ -10,14 +10,13 @@
       box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
     }
     body {
       margin: 0;
       padding: 0;
       background-color: #f8fafc;
       color: #0f172a;
-      padding-bottom: 80px;
+      padding-bottom: 85px;
     }
     .header {
       background-color: #2563eb;
@@ -38,8 +37,9 @@
       background: none;
       border: none;
       color: white;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       cursor: pointer;
+      padding: 4px;
     }
     .container {
       padding: 16px;
@@ -259,7 +259,7 @@
       display: flex;
       border-top: 1px solid #e2e8f0;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-      z-index: 50;
+      z-index: 10;
     }
     .nav-item {
       flex: 1;
@@ -277,28 +277,6 @@
     .nav-item.active {
       color: #2563eb;
       font-weight: 600;
-    }
-    /* Setelan Modal Diperbaiki */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 100;
-    }
-    .modal-box {
-      background: white;
-      width: 100%;
-      max-width: 360px;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
     .page { display: none; }
     .page.active { display: block; }
@@ -342,9 +320,9 @@
   <!-- HEADER -->
   <div class="header">
     <div class="header-title" id="appHeader">
-      <i class="bi bi-wallet2"></i> <span>Hari Ini</span>
+      <i class="bi bi-wallet2"></i> <span id="headerTitleText">Hari Ini</span>
     </div>
-    <button class="btn-icon-head" onclick="bukaModal('modalSaldo')">
+    <button class="btn-icon-head" id="btnBukaSaldo" title="Sesuaikan Saldo">
       <i class="bi bi-sliders"></i>
     </button>
   </div>
@@ -377,20 +355,20 @@
       </div>
     </div>
 
-    <button class="btn-success" onclick="simpanInsentif()">
+    <button class="btn-success" id="btnInsentif">
       <i class="bi bi-clock-history"></i> Hadir Tepat Waktu (+15rb ke Tunai)
     </button>
 
     <div class="card">
       <span style="font-size:0.85rem; font-weight:600; color:#64748b; margin-bottom:8px; display:block;">Pilih Dompet</span>
       <div class="wallet-select-group" id="group-dompet">
-        <div class="wallet-btn active" onclick="pilihDompet(this, 'tunai')">
+        <div class="wallet-btn active" data-val="tunai">
           <i class="bi bi-cash icon-tunai"></i> Tunai
         </div>
-        <div class="wallet-btn" onclick="pilihDompet(this, 'gopay')">
+        <div class="wallet-btn" data-val="gopay">
           <i class="bi bi-circle-fill icon-gopay"></i> GoPay
         </div>
-        <div class="wallet-btn" onclick="pilihDompet(this, 'mandiri')">
+        <div class="wallet-btn" data-val="mandiri">
           <i class="bi bi-bank2 icon-mandiri"></i> Mandiri
         </div>
       </div>
@@ -401,40 +379,40 @@
       </div>
 
       <div class="quick-nominal">
-        <div class="btn-quick" onclick="isiCepat(15000)">15k</div>
-        <div class="btn-quick" onclick="isiCepat(25000)">25k</div>
-        <div class="btn-quick" onclick="isiCepat(35000)">35k</div>
-        <div class="btn-quick" onclick="isiCepat(50000)">50k</div>
+        <div class="btn-quick" data-nom="15000">15k</div>
+        <div class="btn-quick" data-nom="25000">25k</div>
+        <div class="btn-quick" data-nom="35000">35k</div>
+        <div class="btn-quick" data-nom="50000">50k</div>
       </div>
 
-      <div class="category-grid">
-        <div class="cat-btn active" onclick="pilihKategori(this, 'Rokok & Kopi')">
+      <div class="category-grid" id="group-kategori">
+        <div class="cat-btn active" data-kat="Rokok & Kopi">
           <i class="bi bi-cup-hot"></i>
           <span>Rokok/Kopi</span>
         </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Hiburan')">
+        <div class="cat-btn" data-kat="Hiburan">
           <i class="bi bi-controller"></i>
           <span>Hiburan</span>
         </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Pulang Sumedang')">
+        <div class="cat-btn" data-kat="Pulang Sumedang">
           <i class="bi bi-fuel-pump"></i>
           <span>Sumedang</span>
         </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Pakaian')">
+        <div class="cat-btn" data-kat="Pakaian">
           <i class="bi bi-bag"></i>
           <span>Pakaian</span>
         </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Bodycare')">
+        <div class="cat-btn" data-kat="Bodycare">
           <i class="bi bi-heart-pulse"></i>
           <span>Bodycare</span>
         </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Lainnya')">
+        <div class="cat-btn" data-kat="Lainnya">
           <i class="bi bi-grid"></i>
           <span>Lainnya</span>
         </div>
       </div>
 
-      <button class="btn-primary" onclick="simpanPengeluaran()">
+      <button class="btn-primary" id="btnSimpanPengeluaran">
         <i class="bi bi-check-circle"></i> Simpan Transaksi
       </button>
     </div>
@@ -445,11 +423,11 @@
     <div class="card">
       <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-plus-circle"></i> Tambah Pinjaman</h3>
       
-      <div class="wallet-select-group">
-        <div class="wallet-btn active" id="btn-tipe-piutang" onclick="pilihTipeHutang('piutang')">
+      <div class="wallet-select-group" id="group-tipe-ht">
+        <div class="wallet-btn active" id="btn-tipe-piutang" data-tipe="piutang">
           <i class="bi bi-arrow-up-right-square"></i> Piutang
         </div>
-        <div class="wallet-btn" id="btn-tipe-hutang" onclick="pilihTipeHutang('hutang')">
+        <div class="wallet-btn" id="btn-tipe-hutang" data-tipe="hutang">
           <i class="bi bi-arrow-down-left-square"></i> Hutang
         </div>
       </div>
@@ -462,12 +440,12 @@
 
       <span style="font-size:0.8rem; color:#64748b; display:block; margin-bottom:6px;">Gunakan Saldo:</span>
       <div class="wallet-select-group" id="group-dompet-ht">
-        <div class="wallet-btn active" onclick="pilihDompetHutang(this, 'tunai')">Tunai</div>
-        <div class="wallet-btn" onclick="pilihDompetHutang(this, 'gopay')">GoPay</div>
-        <div class="wallet-btn" onclick="pilihDompetHutang(this, 'mandiri')">Mandiri</div>
+        <div class="wallet-btn active" data-val="tunai">Tunai</div>
+        <div class="wallet-btn" data-val="gopay">GoPay</div>
+        <div class="wallet-btn" data-val="mandiri">Mandiri</div>
       </div>
 
-      <button class="btn-primary" onclick="simpanDataHutang()">
+      <button class="btn-primary" id="btnSimpanHutang">
         <i class="bi bi-save"></i> Simpan Pinjaman
       </button>
     </div>
@@ -500,7 +478,7 @@
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <h3 style="margin:0; font-size:1.05rem;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
-        <button onclick="bukaModal('modalTabungan')" style="background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
+        <button id="btnBukaTabungan" style="background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
       </div>
       <div id="wadahPosTabungan">Belum ada pos tabungan.</div>
     </div>
@@ -515,53 +493,21 @@
     </div>
   </div>
 
-  <!-- MODAL SESUAIKAN SALDO -->
-  <div class="modal-overlay" id="modalSaldo">
-    <div class="modal-box">
-      <h3 style="margin-top:0;"><i class="bi bi-sliders"></i> Sesuaikan Saldo</h3>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.8rem; font-weight:600;">Saldo Tunai</label>
-        <input type="number" id="set-tunai" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.8rem; font-weight:600;">Saldo GoPay</label>
-        <input type="number" id="set-gopay" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:0.8rem; font-weight:600;">Saldo Mandiri</label>
-        <input type="number" id="set-mandiri" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <button class="btn-primary" onclick="simpanSaldoBaru()">Simpan</button>
-      <button onclick="tutupModal('modalSaldo')" style="width:100%; background:none; border:none; color:#64748b; padding:12px; margin-top:6px; cursor:pointer;">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL POS TABUNGAN -->
-  <div class="modal-overlay" id="modalTabungan">
-    <div class="modal-box">
-      <h3 style="margin-top:0;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Baru</h3>
-      <input type="text" id="namaPos" class="form-input-plain" placeholder="Nama Pos (Cth: Mudik)">
-      <input type="number" id="nominalPos" class="form-input-plain" placeholder="Nominal Disisihkan (Rp)">
-      <button class="btn-primary" onclick="simpanPosBaru()">Simpan Pos</button>
-      <button onclick="tutupModal('modalTabungan')" style="width:100%; background:none; border:none; color:#64748b; padding:12px; margin-top:6px; cursor:pointer;">Tutup</button>
-    </div>
-  </div>
-
   <!-- NAVIGASI BAWAH -->
   <div class="nav-bottom">
-    <div class="nav-item active" onclick="pindahHalaman('catat', 'Hari Ini', 'bi-wallet2')">
+    <div class="nav-item active" data-tab="catat" data-title="Hari Ini" data-icon="bi-wallet2">
       <i class="bi bi-pencil-square"></i>
       <span>Catat</span>
     </div>
-    <div class="nav-item" onclick="pindahHalaman('hutang', 'Utang & Piutang', 'bi-arrow-left-right')">
+    <div class="nav-item" data-tab="hutang" data-title="Utang & Piutang" data-icon="bi-arrow-left-right">
       <i class="bi bi-arrow-left-right"></i>
       <span>Pinjaman</span>
     </div>
-    <div class="nav-item" onclick="pindahHalaman('riwayat', 'Riwayat', 'bi-journal-text')">
+    <div class="nav-item" data-tab="riwayat" data-title="Riwayat" data-icon="bi-journal-text">
       <i class="bi bi-clock-history"></i>
       <span>Riwayat</span>
     </div>
-    <div class="nav-item" onclick="pindahHalaman('laporan', 'Laporan & Tabungan', 'bi-bar-chart-line')">
+    <div class="nav-item" data-tab="laporan" data-title="Laporan & Tabungan" data-icon="bi-bar-chart-line">
       <i class="bi bi-pie-chart"></i>
       <span>Laporan</span>
     </div>
@@ -569,486 +515,412 @@
 
   <script>
     const BATAS_HARIAN = 50000;
-    let kategoriTerpilih = 'Rokok & Kopi';
     let dompetTerpilih = 'tunai';
-    let tipeHutangTerpilih = 'piutang';
     let dompetHutangTerpilih = 'tunai';
-
-    function ambilStorage(key, def) {
-      try {
-        const val = localStorage.getItem(key);
-        return val ? JSON.parse(val) : def;
-      } catch (e) {
-        return def;
-      }
-    }
-
-    function simpanStorage(key, val) {
-      localStorage.setItem(key, JSON.stringify(val));
-    }
-
-    function pindahHalaman(idHalaman, judul, ikon) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      
-      const target = document.getElementById('page-' + idHalaman);
-      if (target) target.classList.add('active');
-      
-      // Mengubah status navigasi
-      const indexMap = { 'catat': 0, 'hutang': 1, 'riwayat': 2, 'laporan': 3 };
-      const items = document.querySelectorAll('.nav-item');
-      if (items[indexMap[idHalaman]]) {
-        items[indexMap[idHalaman]].classList.add('active');
-      }
-
-      document.getElementById('appHeader').innerHTML = `<i class="bi ${ikon}"></i> <span>${judul}</span>`;
-
-      if (idHalaman === 'hutang') renderHutang();
-      if (idHalaman === 'riwayat') renderRiwayat();
-      if (idHalaman === 'laporan') renderLaporan();
-    }
-
-    function bukaModal(id) {
-      if (id === 'modalSaldo') {
-        const/i>
-        <input type="number" id="inputNominal" placeholder="Nominal (Rp)">
-      </div>
-
-      <div class="quick-nominal">
-        <div class="btn-quick" onclick="isiCepat(15000)">15k</div>
-        <div class="btn-quick" onclick="isiCepat(25000)">25k</div>
-        <div class="btn-quick" onclick="isiCepat(35000)">35k</div>
-        <div class="btn-quick" onclick="isiCepat(50000)">50k</div>
-      </div>
-
-      <div class="category-grid">
-        <div class="cat-btn active" onclick="pilihKategori(this, 'Rokok & Kopi')">
-          <i class="bi bi-cup-hot"></i>
-          <span>Rokok/Kopi</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Hiburan')">
-          <i class="bi bi-controller"></i>
-          <span>Hiburan</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Pulang Sumedang')">
-          <i class="bi bi-fuel-pump"></i>
-          <span>Sumedang</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Pakaian')">
-          <i class="bi bi-bag"></i>
-          <span>Pakaian</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Bodycare')">
-          <i class="bi bi-heart-pulse"></i>
-          <span>Bodycare</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Lainnya')">
-          <i class="bi bi-grid"></i>
-          <span>Lainnya</span>
-        </div>
-      </div>
-
-      <button class="btn-primary" onclick="simpanPengeluaran()">
-        <i class="bi bi-check-circle"></i> Simpan Transaksi
-      </button>
-    </div>
-  </div>
-
-  <!-- TAB 2: HUTANG & PIUTANG -->
-  <div id="page-hutang" class="page container">
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-plus-circle"></i> Tambah Catatan Pinjaman</h3>
-      
-      <div class="wallet-select-group">
-        <div class="wallet-btn active" id="btn-tipe-piutang" onclick="pilihTipeHutang('piutang')">
-          <i class="bi bi-arrow-up-right-square"></i> Piutang (Saya Pinjamkan)
-        </div>
-        <div class="wallet-btn" id="btn-tipe-hutang" onclick="pilihTipeHutang('hutang')">
-          <i class="bi bi-arrow-down-left-square"></i> Hutang (Saya Pinjam)
-        </div>
-      </div>
-
-      <input type="text" id="namaOrang" class="form-input-plain" placeholder="Nama Pihak / Teman">
-      <input type="number" id="nominalHutang" class="form-input-plain" placeholder="Nominal (Rp)">
-
-      <label style="font-size:0.8rem; font-weight:600; color:#64748b; margin-bottom:4px; display:block;">Tanggal Jatuh Tempo:</label>
-      <input type="date" id="tglJatuhTempo" class="form-input-plain">
-
-      <span style="font-size:0.8rem; color:#64748b; display:block; margin-bottom:6px;">Gunakan Saldo Dompet:</span>
-      <div class="wallet-select-group" id="group-dompet-hutang">
-        <div class="wallet-btn active" onclick="pilihDompetHutang(this, 'tunai')">Tunai</div>
-        <div class="wallet-btn" onclick="pilihDompetHutang(this, 'gopay')">GoPay</div>
-        <div class="wallet-btn" onclick="pilihDompetHutang(this, 'mandiri')">Mandiri</div>
-      </div>
-
-      <button class="btn-primary" onclick="simpanDataHutang()">
-        <i class="bi bi-save"></i> Simpan Pinjaman
-      </button>
-    </div>
-
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-list-task"></i> Daftar Aktif</h3>
-      <div id="wadahHutang">Belum ada catatan pinjaman.</div>
-    </div>
-  </div>
-
-  <!-- TAB 3: RIWAYAT -->
-  <div id="page-riwayat" class="page container">
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-journal-text"></i> Transaksi Terkini</h3>
-      <div id="wadahRiwayat">Belum ada mutasi.</div>
-    </div>
-  </div>
-
-  <!-- TAB 4: LAPORAN & TABUNGAN -->
-  <div id="page-laporan" class="page container">
-    <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white;">
-      <div style="font-size: 0.85rem; opacity: 0.9;">Uang Bebas Pakai (Siap Belanja)</div>
-      <div id="rep-uang-bebas" style="font-size: 1.7rem; font-weight: bold; margin: 4px 0 10px 0;">Rp 0</div>
-      <div style="font-size: 0.8rem; opacity: 0.85; display: flex; justify-content: space-between;">
-        <span>Total Likuiditas: <b id="rep-total-kas">Rp 0</b></span>
-        <span>Terkunci Tabungan: <b id="rep-total-tabung">Rp 0</b></span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0; font-size:1.05rem;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
-        <button onclick="bukaModalTabungan()" style="background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
-      </div>
-      <div id="wadahPosTabungan">Belum ada pos tabungan.</div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-bar-chart-line"></i> Rincian Dompet & Kewajiban</h3>
-      <div class="list-item"><span><i class="bi bi-cash icon-tunai"></i> Kas Tunai</span> <span id="rep-tunai">Rp 0</span></div>
-      <div class="list-item"><span><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay</span> <span id="rep-gopay">Rp 0</span></div>
-      <div class="list-item"><span><i class="bi bi-bank2 icon-mandiri"></i> Bank Mandiri</span> <span id="rep-mandiri">Rp 0</span></div>
-      <div class="list-item" style="color:#0284c7;"><span>Piutang Belum Lunas</span> <span id="rep-piutang">Rp 0</span></div>
-      <div class="list-item" style="color:#ef4444;"><span>Hutang Belum Lunas</span> <span id="rep-hutang">Rp 0</span></div>
-    </div>
-  </div>
-
-  <!-- MODAL SESUAIKAN SALDO -->
-  <div class="modal" id="modalSaldo">
-    <div class="modal-content">
-      <h3 style="margin-top:0;"><i class="bi bi-sliders"></i> Sesuaikan Saldo Dompet</h3>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.8rem; font-weight:600;"><i class="bi bi-cash icon-tunai"></i> Saldo Tunai</label>
-        <input type="number" id="set-tunai" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.8rem; font-weight:600;"><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay</label>
-        <input type="number" id="set-gopay" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:0.8rem; font-weight:600;"><i class="bi bi-bank2 icon-mandiri"></i> Saldo Mandiri</label>
-        <input type="number" id="set-mandiri" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <button class="btn-primary" onclick="simpanSaldoBaru()">Simpan Penyesuaian</button>
-      <button onclick="tutupModalSaldo()" style="width:100%; background:none; border:none; color:#64748b; padding:10px; margin-top:6px; cursor:pointer;">Batal</button>
-    </div>
-  </div>
-
-  <!-- MODAL POS TABUNGAN -->
-  <div class="modal" id="modalTabungan">
-    <div class="modal-content">
-      <h3 style="margin-top:0;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Baru</h3>
-      <input type="text" id="namaPos" class="form-input-plain" placeholder="Nama Tabungan (Cth: Darurat)">
-      <input type="number" id="nominalPos" class="form-input-plain" placeholder="Nominal Terkunci (Rp)">
-      <button class="btn-primary" onclick="simpanPosBaru()">Buat Pos Tabungan</button>
-      <button onclick="tutupModalTabungan()" style="width:100%; background:none; border:none; color:#64748b; padding:10px; margin-top:6px; cursor:pointer;">Batal</button>
-    </div>
-  </div>
-
-  <!-- NAVIGASI BAWAH -->
-  <div class="nav-bottom">
-    <div class="nav-item active" id="nav-catat" onclick="bukaTab('catat', 'Hari Ini', 'bi-wallet2')">
-      <i class="bi bi-pencil-square"></i>
-      <span>Catat</span>
-    </div>
-    <div class="nav-item" id="nav-hutang" onclick="bukaTab('hutang', 'Utang & Piutang', 'bi-arrow-left-right')">
-      <i class="bi bi-arrow-left-right"></i>
-      <span>Pinjaman</span>
-    </div>
-    <div class="nav-item" id="nav-riwayat" onclick="bukaTab('riwayat', 'Riwayat', 'bi-journal-text')">
-      <i class="bi bi-clock-history"></i>
-      <span>Riwayat</span>
-    </div>
-    <div class="nav-item" id="nav-laporan" onclick="bukaTab('laporan', 'Laporan & Tabungan', 'bi-bar-chart-line')">
-      <i class="bi bi-pie-chart"></i>
-      <span>Laporan</span>
-    </div>
-  </div>
-
-  <script>
-    const BATAS_HARIAN = 50000;
     let kategoriTerpilih = 'Rokok & Kopi';
-    let dompetTerpilih = 'tunai';
     let tipeHutangTerpilih = 'piutang';
-    let dompetHutangTerpilih = 'tunai';
 
-    function ambilData(kunci, nilaiBawaan) {
+    // Utilitas Penyimpanan Aman
+    function bacaData(kunci, bawaan) {
       try {
         const item = localStorage.getItem(kunci);
-        return item ? JSON.parse(item) : nilaiBawaan;
+        return item ? JSON.parse(item) : bawaan;
       } catch (e) {
-        return nilaiBawaan;
+        return bawaan;
       }
     }
 
-    function simpanData(kunci, nilai) {
-      localStorage.setItem(kunci, JSON.stringify(nilai));
-    }
-
-    function initSaldo() {
-      const saldo = ambilData('artos_saldo', null);
-      if (!saldo) {
-        simpanData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 2500000 });
+    function tulisData(kunci, nilai) {
+      try {
+        localStorage.setItem(kunci, JSON.stringify(nilai));
+      } catch (e) {
+        console.error(e);
       }
-      muatSaldo();
     }
 
-    function muatSaldo() {
-      const saldo = ambilData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-      const elTunai = document.getElementById('saldo-tunai');
-      const elGopay = document.getElementById('saldo-gopay');
-      const elMandiri = document.getElementById('saldo-mandiri');
-      
-      if (elTunai) elTunai.innerText = `Rp ${Number(saldo.tunai).toLocaleString('id-ID')}`;
-      if (elGopay) elGopay.innerText = `Rp ${Number(saldo.gopay).toLocaleString('id-ID')}`;
-      if (elMandiri) elMandiri.innerText = `Rp ${Number(saldo.mandiri).toLocal    <div class="btn-quick" onclick="isiCepat(25000)">25k</div>
-        <div class="btn-quick" onclick="isiCepat(35000)">35k</div>
-        <div class="btn-quick" onclick="isiCepat(50000)">50k</div>
-      </div>
-
-      <div class="category-grid">
-        <div class="cat-btn active" onclick="pilihKategori(this, 'Rokok & Kopi')">
-          <i class="bi bi-cup-hot"></i>
-          <span>Rokok/Kopi</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Hiburan')">
-          <i class="bi bi-controller"></i>
-          <span>Hiburan</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Pulang Sumedang')">
-          <i class="bi bi-fuel-pump"></i>
-          <span>Sumedang</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Pakaian')">
-          <i class="bi bi-bag"></i>
-          <span>Pakaian</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Bodycare')">
-          <i class="bi bi-heart-pulse"></i>
-          <span>Bodycare</span>
-        </div>
-        <div class="cat-btn" onclick="pilihKategori(this, 'Lainnya')">
-          <i class="bi bi-grid"></i>
-          <span>Lainnya</span>
-        </div>
-      </div>
-
-      <button class="btn-primary" onclick="simpanPengeluaran()">
-        <i class="bi bi-check-circle"></i> Simpan Transaksi
-      </button>
-    </div>
-  </div>
-
-  <!-- TAB 2: HUTANG & PIUTANG -->
-  <div id="page-hutang" class="page container">
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-plus-circle"></i> Tambah Catatan Pinjaman</h3>
-      
-      <div class="wallet-select-group">
-        <div class="wallet-btn active" id="btn-tipe-piutang" onclick="pilihTipeHutang('piutang')">
-          <i class="bi bi-arrow-up-right-square"></i> Piutang (Saya Pinjamkan)
-        </div>
-        <div class="wallet-btn" id="btn-tipe-hutang" onclick="pilihTipeHutang('hutang')">
-          <i class="bi bi-arrow-down-left-square"></i> Hutang (Saya Pinjam)
-        </div>
-      </div>
-
-      <input type="text" id="namaOrang" class="form-input-plain" placeholder="Nama Pihak / Teman">
-      <input type="number" id="nominalHutang" class="form-input-plain" placeholder="Nominal (Rp)">
-
-      <label style="font-size:0.8rem; font-weight:600; color:#64748b; margin-bottom:4px; display:block;">Tanggal Jatuh Tempo:</label>
-      <input type="date" id="tglJatuhTempo" class="form-input-plain">
-
-      <span style="font-size:0.8rem; color:#64748b; display:block; margin-bottom:6px;">Gunakan Saldo Dompet:</span>
-      <div class="wallet-select-group">
-        <div class="wallet-btn active" onclick="pilihDompetHutang(this, 'tunai')">Tunai</div>
-        <div class="wallet-btn" onclick="pilihDompetHutang(this, 'gopay')">GoPay</div>
-        <div class="wallet-btn" onclick="pilihDompetHutang(this, 'mandiri')">Mandiri</div>
-      </div>
-
-      <button class="btn-primary" onclick="simpanDataHutang()">
-        <i class="bi bi-save"></i> Simpan Pinjaman
-      </button>
-    </div>
-
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-list-task"></i> Daftar Aktif</h3>
-      <div id="wadahHutang">Belum ada catatan pinjaman.</div>
-    </div>
-  </div>
-
-  <!-- TAB 3: RIWAYAT -->
-  <div id="page-riwayat" class="page container">
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-journal-text"></i> Transaksi Terkini</h3>
-      <div id="wadahRiwayat">Belum ada mutasi.</div>
-    </div>
-  </div>
-
-  <!-- TAB 4: LAPORAN & TABUNGAN -->
-  <div id="page-laporan" class="page container">
-    
-    <!-- KARTU DISTRIBUSI: BEBAS PAKAI VS TABUNGAN -->
-    <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white;">
-      <div style="font-size: 0.85rem; opacity: 0.9;">Uang Bebas Pakai (Siap Belanja)</div>
-      <div id="rep-uang-bebas" style="font-size: 1.7rem; font-weight: bold; margin: 4px 0 10px 0;">Rp 0</div>
-      <div style="font-size: 0.8rem; opacity: 0.85; display: flex; justify-content: space-between;">
-        <span>Total Likuiditas: <b id="rep-total-kas">Rp 0</b></span>
-        <span>Terkunci Tabungan: <b id="rep-total-tabung">Rp 0</b></span>
-      </div>
-    </div>
-
-    <!-- POS TABUNGAN / CELENGAN -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0; font-size:1.05rem;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
-        <button onclick="bukaModalTabungan()" style="background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
-      </div>
-      <div id="wadahPosTabungan">Belum ada pos tabungan.</div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-bar-chart-line"></i> Rincian Dompet & Kewajiban</h3>
-      <div class="list-item"><span><i class="bi bi-cash icon-tunai"></i> Kas Tunai</span> <span id="rep-tunai">Rp 0</span></div>
-      <div class="list-item"><span><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay</span> <span id="rep-gopay">Rp 0</span></div>
-      <div class="list-item"><span><i class="bi bi-bank2 icon-mandiri"></i> Bank Mandiri</span> <span id="rep-mandiri">Rp 0</span></div>
-      <div class="list-item" style="color:#0284c7;"><span>Piutang Belum Lunas</span> <span id="rep-piutang">Rp 0</span></div>
-      <div class="list-item" style="color:#ef4444;"><span>Hutang Belum Lunas</span> <span id="rep-hutang">Rp 0</span></div>
-    </div>
-  </div>
-
-  <!-- MODAL SESUAIKAN SALDO -->
-  <div class="modal" id="modalSaldo">
-    <div class="modal-content">
-      <h3 style="margin-top:0;"><i class="bi bi-sliders"></i> Sesuaikan Saldo Dompet</h3>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.8rem; font-weight:600;"><i class="bi bi-cash icon-tunai"></i> Saldo Tunai</label>
-        <input type="number" id="set-tunai" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.8rem; font-weight:600;"><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay</label>
-        <input type="number" id="set-gopay" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:0.8rem; font-weight:600;"><i class="bi bi-bank2 icon-mandiri"></i> Saldo Mandiri</label>
-        <input type="number" id="set-mandiri" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:4px;">
-      </div>
-      <button class="btn-primary" onclick="simpanSaldoBaru()">Simpan Penyesuaian</button>
-      <button onclick="tutupModalSaldo()" style="width:100%; background:none; border:none; color:#64748b; padding:10px; margin-top:6px;">Batal</button>
-    </div>
-  </div>
-
-  <!-- MODAL POS TABUNGAN -->
-  <div class="modal" id="modalTabungan">
-    <div class="modal-content">
-      <h3 style="margin-top:0;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Baru</h3>
-      <input type="text" id="namaPos" class="form-input-plain" placeholder="Nama Tabungan (Cth: Darurat)">
-      <input type="number" id="nominalPos" class="form-input-plain" placeholder="Nominal Awal Terkunci (Rp)">
-      <button class="btn-primary" onclick="simpanPosBaru()">Buat Pos Tabungan</button>
-      <button onclick="tutupModalTabungan()" style="width:100%; background:none; border:none; color:#64748b; padding:10px; margin-top:6px;">Batal</button>
-    </div>
-  </div>
-
-  <!-- NAVIGASI BAWAH -->
-  <div class="nav-bottom">
-    <div class="nav-item active" id="nav-catat" onclick="bukaTab('catat', 'Hari Ini', 'bi-wallet2')">
-      <i class="bi bi-pencil-square"></i>
-      <span>Catat</span>
-    </div>
-    <div class="nav-item" id="nav-hutang" onclick="bukaTab('hutang', 'Utang & Piutang', 'bi-arrow-left-right')">
-      <i class="bi bi-arrow-left-right"></i>
-      <span>Pinjaman</span>
-    </div>
-    <div class="nav-item" id="nav-riwayat" onclick="bukaTab('riwayat', 'Riwayat', 'bi-journal-text')">
-      <i class="bi bi-clock-history"></i>
-      <span>Riwayat</span>
-    </div>
-    <div class="nav-item" id="nav-laporan" onclick="bukaTab('laporan', 'Laporan & Tabungan', 'bi-bar-chart-line')">
-      <i class="bi bi-pie-chart"></i>
-      <span>Laporan</span>
-    </div>
-  </div>
-
-  <script>
-    const BATAS_HARIAN = 50000;
-    let kategoriTerpilih = 'Rokok & Kopi';
-    let dompetTerpilih = 'tunai';
-    let tipeHutangTerpilih = 'piutang';
-    let dompetHutangTerpilih = 'tunai';
-
-    function initSaldo() {
-      if (!localStorage.getItem('artos_saldo')) {
-        const saldoAwal = { tunai: 0, gopay: 0, mandiri: 2500000 };
-        localStorage.setItem('artos_saldo', JSON.stringify(saldoAwal));
+    // Pembersihan & Inisialisasi Saldo
+    function siapkanSaldo() {
+      let saldo = bacaData('artos_saldo', null);
+      if (!saldo || typeof saldo !== 'object') {
+        saldo = { tunai: 0, gopay: 0, mandiri: 2500000 };
+        tulisData('artos_saldo', saldo);
       }
-      muatSaldo();
+      renderTampilanSaldo();
     }
 
-    function muatSaldo() {
-      const saldo = JSON.parse(localStorage.getItem('artos_saldo'));
-      document.getElementById('saldo-tunai').innerText = `Rp ${Number(saldo.tunai).toLocaleString('id-ID')}`;
-      document.getElementById('saldo-gopay').innerText = `Rp ${Number(saldo.gopay).toLocaleString('id-ID')}`;
-      document.getElementById('saldo-mandiri').innerText = `Rp ${Number(saldo.mandiri).toLocaleString('id-ID')}`;
+    function renderTampilanSaldo() {
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+      document.getElementById('saldo-tunai').innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
+      document.getElementById('saldo-gopay').innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
+      document.getElementById('saldo-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
     }
 
-    function bukaModalSaldo() {
-      const saldo = JSON.parse(localStorage.getItem('artos_saldo'));
-      document.getElementById('set-tunai').value = saldo.tunai;
-      document.getElementById('set-gopay').value = saldo.gopay;
-      document.getElementById('set-mandiri').value = saldo.mandiri;
-      document.getElementById('modalSaldo').style.display = 'flex';
+    // Pindah Tab Halaman
+    function pasangNavigasi() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const tabTujuan = this.getAttribute('data-tab');
+          const judul = this.getAttribute('data-title');
+          const ikon = this.getAttribute('data-icon');
+
+          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+          const elTujuan = document.getElementById('page-' + tabTujuan);
+          if (elTujuan) elTujuan.classList.add('active');
+          this.classList.add('active');
+
+          document.getElementById('appHeader').innerHTML = `<i class="bi ${ikon}"></i> <span>${judul}</span>`;
+
+          if (tabTujuan === 'hutang') renderHutang();
+          if (tabTujuan === 'riwayat') renderRiwayat();
+          if (tabTujuan === 'laporan') renderLaporan();
+        });
+      });
     }
 
-    function tutupModalSaldo() {
-      document.getElementById('modalSaldo').style.display = 'none';
+    // Pilihan Dompet Catat
+    function pasangPilihanDompet() {
+      document.querySelectorAll('#group-dompet .wallet-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('#group-dompet .wallet-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          dompetTerpilih = this.getAttribute('data-val');
+        });
+      });
+
+      document.querySelectorAll('#group-dompet-ht .wallet-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('#group-dompet-ht .wallet-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          dompetHutangTerpilih = this.getAttribute('data-val');
+        });
+      });
+
+      document.querySelectorAll('#group-tipe-ht .wallet-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('#group-tipe-ht .wallet-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          tipeHutangTerpilih = this.getAttribute('data-tipe');
+        });
+      });
     }
 
-    function simpanSaldoBaru() {
-      const saldoBaru = {
-        tunai: parseInt(document.le="color:${warna}">${tanda} Rp ${item.nominal.toLocaleString('id-ID')}</span>
+    // Pilihan Kategori Grid
+    function pasangPilihanKategori() {
+      document.querySelectorAll('#group-kategori .cat-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('#group-kategori .cat-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          kategoriTerpilih = this.getAttribute('data-kat');
+        });
+      });
+    }
+
+    // Pilihan Cepat Nominal
+    function pasangQuickNominal() {
+      document.querySelectorAll('.btn-quick').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.getElementById('inputNominal').value = this.getAttribute('data-nom');
+        });
+      });
+    }
+
+    // Simpan Insentif
+    document.getElementById('btnInsentif').addEventListener('click', function() {
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+      saldo.tunai = (saldo.tunai || 0) + 15000;
+      tulisData('artos_saldo', saldo);
+
+      const logs = bacaData('catatan_uang', []);
+      logs.push({ jenis: 'Masuk', kategori: 'Insentif Hadir', nominal: 15000, dompet: 'tunai', waktu: new Date().toISOString() });
+      tulisData('catatan_uang', logs);
+
+      renderTampilanSaldo();
+      alert('Insentif Rp 15.000 berhasil ditambahkan ke saldo Tunai.');
+    });
+
+    // Simpan Pengeluaran
+    document.getElementById('btnSimpanPengeluaran').addEventListener('click', function() {
+      const inp = document.getElementById('inputNominal');
+      const nom = parseInt(inp.value);
+      if (!nom || nom <= 0) return alert('Silakan isi nominal pengeluaran.');
+
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+      if ((saldo[dompetTerpilih] || 0) < nom) return alert('Saldo ' + dompetTerpilih.toUpperCase() + ' tidak cukup.');
+
+      saldo[dompetTerpilih] -= nom;
+      tulisData('artos_saldo', saldo);
+
+      const logs = bacaData('catatan_uang', []);
+      logs.push({ jenis: 'Keluar', kategori: kategoriTerpilih, nominal: nom, dompet: dompetTerpilih, waktu: new Date().toISOString() });
+      tulisData('catatan_uang', logs);
+
+      inp.value = '';
+      renderTampilanSaldo();
+      renderDasbor();
+      alert('Pengeluaran berhasil dicatat.');
+    });
+
+    // Indikator Kuota Harian
+    function renderDasbor() {
+      const logs = bacaData('catatan_uang', []);
+      const hariIni = new Date().toISOString().split('T')[0];
+
+      let keluarHariIni = 0;
+      logs.forEach(l => {
+        if (l.waktu && l.waktu.startsWith(hariIni) && l.jenis === 'Keluar' && l.kategori === 'Rokok & Kopi') {
+          keluarHariIni += l.nominal;
+        }
+      });
+
+      const sisa = BATAS_HARIAN - keluarHariIni;
+      document.getElementById('teksSisaKuota').innerHTML = `<b>Rp ${sisa.toLocaleString('id-ID')}</b>`;
+
+      let persen = (keluarHariIni / BATAS_HARIAN) * 100;
+      if (persen > 100) persen = 100;
+
+      const bar = document.getElementById('barKuota');
+      bar.style.width = persen + '%';
+      if (persen > 90) bar.style.backgroundColor = '#ef4444';
+      else if (persen > 70) bar.style.backgroundColor = '#f59e0b';
+      else bar.style.backgroundColor = '#10b981';
+    }
+
+    // Modal Saldo Cepat via Prompt (Bebas Galat Blokir Layar)
+    document.getElementById('btnBukaSaldo').addEventListener('click', function() {
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+      const tBaru = prompt('Masukkan Saldo Tunai:', saldo.tunai || 0);
+      if (tBaru === null) return;
+      const gBaru = prompt('Masukkan Saldo GoPay:', saldo.gopay || 0);
+      if (gBaru === null) return;
+      const mBaru = prompt('Masukkan Saldo Mandiri:', saldo.mandiri || 0);
+      if (mBaru === null) return;
+
+      saldo.tunai = parseInt(tBaru) || 0;
+      saldo.gopay = parseInt(gBaru) || 0;
+      saldo.mandiri = parseInt(mBaru) || 0;
+
+      tulisData('artos_saldo', saldo);
+      renderTampilanSaldo();
+      renderLaporan();
+      alert('Saldo berhasil diperbarui.');
+    });
+
+    // Simpan Pinjaman
+    document.getElementById('btnSimpanHutang').addEventListener('click', function() {
+      const nama = document.getElementById('namaOrang').value.trim();
+      const nom = parseInt(document.getElementById('nominalHutang').value);
+      const tempo = document.getElementById('tglJatuhTempo').value;
+
+      if (!nama || !nom || nom <= 0) return alert('Mohon lengkapi data pinjaman.');
+
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+
+      if (tipeHutangTerpilih === 'piutang') {
+        if ((saldo[dompetHutangTerpilih] || 0) < nom) return alert('Saldo tidak cukup untuk meminjamkan.');
+        saldo[dompetHutangTerpilih] -= nom;
+      } else {
+        saldo[dompetHutangTerpilih] = (saldo[dompetHutangTerpilih] || 0) + nom;
+      }
+
+      tulisData('artos_saldo', saldo);
+
+      const hutangList = bacaData('artos_hutang', []);
+      hutangList.push({ id: Date.now(), tipe: tipeHutangTerpilih, nama: nama, nominal: nom, dompet: dompetHutangTerpilih, tempo: tempo || null, lunas: false });
+      tulisData('artos_hutang', hutangList);
+
+      document.getElementById('namaOrang').value = '';
+      document.getElementById('nominalHutang').value = '';
+      document.getElementById('tglJatuhTempo').value = '';
+
+      renderTampilanSaldo();
+      renderHutang();
+      alert('Catatan pinjaman berhasil disimpan.');
+    });
+
+    // Render Daftar Hutang
+    function renderHutang() {
+      const hutangList = bacaData('artos_hutang', []);
+      const wadah = document.getElementById('wadahHutang');
+      wadah.innerHTML = '';
+
+      const aktif = hutangList.filter(h => !h.lunas);
+      if (aktif.length === 0) {
+        wadah.innerText = 'Semua pinjaman telah lunas.';
+        return;
+      }
+
+      const hariIni = new Date().toISOString().split('T')[0];
+
+      aktif.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'debt-card';
+        const label = h.tipe === 'piutang' ? 'Piutang ke' : 'Hutang dari';
+        const warna = h.tipe === 'piutang' ? '#0284c7' : '#ef4444';
+
+        let tglInfo = '';
+        if (h.tempo) {
+          const lewat = h.tempo < hariIni;
+          tglInfo = `<div style="font-size:0.75rem; color:#64748b; margin-top:2px;">Tempo: ${h.tempo} ${lewat ? '<span class="overdue-badge">Lewat</span>' : ''}</div>`;
+        }
+
+        div.innerHTML = `
+          <div>
+            <span style="font-size:0.75rem; color:${warna}; font-weight:bold; text-transform:uppercase;">${label}</span>
+            <div style="font-weight:600;">${h.nama}</div>
+            <div style="font-size:0.9rem;">Rp ${h.nominal.toLocaleString('id-ID')} (${h.dompet})</div>
+            ${tglInfo}
+          </div>
+        `;
+
+        const btnLunas = document.createElement('button');
+        btnLunas.className = 'btn-sm-lunas';
+        btnLunas.innerText = 'Lunas';
+        btnLunas.onclick = function() {
+          lunaskanPinjaman(h.id);
+        };
+
+        div.appendChild(btnLunas);
+        wadah.appendChild(div);
+      });
+    }
+
+    function lunaskanPinjaman(id) {
+      const hutangList = bacaData('artos_hutang', []);
+      const target = hutangList.find(h => h.id === id);
+      if (!target) return;
+
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+
+      if (target.tipe === 'piutang') {
+        saldo[target.dompet] = (saldo[target.dompet] || 0) + target.nominal;
+      } else {
+        if ((saldo[target.dompet] || 0) < target.nominal) return alert('Saldo tidak cukup untuk melunasi.');
+        saldo[target.dompet] -= target.nominal;
+      }
+
+      target.lunas = true;
+      tulisData('artos_saldo', saldo);
+      tulisData('artos_hutang', hutangList);
+
+      renderTampilanSaldo();
+      renderHutang();
+      alert('Pinjaman berhasil dilunasi.');
+    }
+
+    // Render Riwayat Mutasi
+    function renderRiwayat() {
+      const logs = bacaData('catatan_uang', []);
+      const wadah = document.getElementById('wadahRiwayat');
+      wadah.innerHTML = '';
+
+      if (logs.length === 0) {
+        wadah.innerText = 'Belum ada transaksi.';
+        return;
+      }
+
+      logs.slice().reverse().forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        const tanda = l.jenis === 'Masuk' ? '+' : '-';
+        const warna = l.jenis === 'Masuk' ? '#10b981' : '#ef4444';
+
+        div.innerHTML = `
+          <div>
+            <div><b>${l.kategori}</b></div>
+            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase;">${l.dompet}</div>
+          </div>
+          <span style="color:${warna}; font-weight:600;">${tanda} Rp ${l.nominal.toLocaleString('id-ID')}</span>
         `;
         wadah.appendChild(div);
       });
     }
 
-    // Fungsi ini menghitung rekapitulasi data saldo pada layar laporan.
-    function hitungLaporan() {
-      const data = JSON.parse(localStorage.getItem('catatan_uang') || '[]');
-      let totalMasuk = 0;
-      let totalKeluar = 0;
+    // Pos Tabungan Baru
+    document.getElementById('btnBukaTabungan').addEventListener('click', function() {
+      const nama = prompt('Nama Pos Tabungan (Cth: Mudik / Darurat):');
+      if (!nama) return;
+      const nom = parseInt(prompt('Nominal Dana Terkunci (Rp):', '0')) || 0;
 
-      data.forEach(item => {
-        if (item.jenis === 'Masuk') totalMasuk += item.nominal;
-        if (item.jenis === 'Keluar') totalKeluar += item.nominal;
+      const pos = bacaData('artos_tabungan', []);
+      pos.push({ id: Date.now(), nama: nama, saldo: nom });
+      tulisData('artos_tabungan', pos);
+
+      renderLaporan();
+    });
+
+    function renderLaporan() {
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+      const totalKas = Number(saldo.tunai || 0) + Number(saldo.gopay || 0) + Number(saldo.mandiri || 0);
+
+      const pos = bacaData('artos_tabungan', []);
+      let totalTabung = 0;
+      const wadahPos = document.getElementById('wadahPosTabungan');
+      wadahPos.innerHTML = '';
+
+      if (pos.length === 0) {
+        wadahPos.innerHTML = '<div style="font-size:0.85rem; color:#94a3b8;">Belum ada pos tabungan terdaftar.</div>';
+      } else {
+        pos.forEach(p => {
+          totalTabung += p.saldo;
+          const div = document.createElement('div');
+          div.className = 'saving-box';
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <b>${p.nama}</b>
+                <div style="color:#2563eb; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
+              </div>
+            </div>
+          `;
+          const btnCair = document.createElement('button');
+          btnCair.className = 'btn-sm-tarik';
+          btnCair.innerText = 'Cairkan';
+          btnCair.onclick = function() {
+            const list = bacaData('artos_tabungan', []);
+            const idx = list.findIndex(i => i.id === p.id);
+            if (idx !== -1 && confirm(`Cairkan tabungan "${p.nama}" ke saldo bebas pakai?`)) {
+              list.splice(idx, 1);
+              tulisData('artos_tabungan', list);
+              renderLaporan();
+            }
+          };
+          div.firstElementChild.appendChild(btnCair);
+          wadahPos.appendChild(div);
+        });
+      }
+
+      const uangBebas = totalKas - totalTabung;
+      document.getElementById('rep-uang-bebas').innerText = 'Rp ' + Number(uangBebas).toLocaleString('id-ID');
+      document.getElementById('rep-total-kas').innerText = 'Rp ' + Number(totalKas).toLocaleString('id-ID');
+      document.getElementById('rep-total-tabung').innerText = 'Rp ' + Number(totalTabung).toLocaleString('id-ID');
+
+      document.getElementById('rep-tunai').innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
+      document.getElementById('rep-gopay').innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
+      document.getElementById('rep-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
+
+      const hutangList = bacaData('artos_hutang', []);
+      let piutang = 0;
+      let hutang = 0;
+      hutangList.filter(h => !h.lunas).forEach(h => {
+        if (h.tipe === 'piutang') piutang += h.nominal;
+        if (h.tipe === 'hutang') hutang += h.nominal;
       });
 
-      const gajiTetap = 2500000;
-      const tabungan = (gajiTetap + totalMasuk) - totalKeluar;
-
-      document.getElementById('teksTotalInsentif').innerText = `Rp ${totalMasuk.toLocaleString('id-ID')}`;
-      document.getElementById('teksTotalKeluar').innerText = `Rp ${totalKeluar.toLocaleString('id-ID')}`;
-      document.getElementById('teksTabungan').innerText = `Rp ${tabungan.toLocaleString('id-ID')}`;
+      document.getElementById('rep-piutang').innerText = 'Rp ' + Number(piutang).toLocaleString('id-ID');
+      document.getElementById('rep-hutang').innerText = 'Rp ' + Number(hutang).toLocaleString('id-ID');
     }
 
-    // Sistem menjalankan fungsi perbarui dasbor ketika layar dimuat pertama kali.
-    window.onload = perbaruiDasbor;
+    // Inisialisasi Penuh saat DOM Siap
+    window.addEventListener('DOMContentLoaded', function() {
+      siapkanSaldo();
+      pasangNavigasi();
+      pasangPilihanDompet();
+      pasangPilihanKategori();
+      pasangQuickNominal();
+      renderDasbor();
+    });
   </script>
 </body>
-  </html>
-  
+</html>
