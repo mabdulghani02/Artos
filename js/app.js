@@ -631,14 +631,14 @@ if (btnSimpanJasaTransfer) {
 }
 
 // ==========================================
-// 13. KONSULTAN FINANSIAL AI (STABIL & LANGSUNG)
+// 13. KONSULTAN FINANSIAL AI (DETEKSI RESMI)
 // ==========================================
 const btnKonsultasiGemini = document.getElementById('btnKonsultasiGemini');
 if (btnKonsultasiGemini) {
   btnKonsultasiGemini.addEventListener('click', async function() {
     const rawKey = localStorage.getItem('artos_gemini_key');
     if (!rawKey || rawKey.trim() === '') {
-      alert('Kunci API belum diisi! Silakan tekan ikon setelan (slider) di kanan atas untuk memasukkan Gemini API Key Anda.');
+      alert('Kunci API belum diisi! Silakan buka panel setelan di kanan atas untuk memasukkan Gemini API Key.');
       return;
     }
 
@@ -647,7 +647,7 @@ if (btnKonsultasiGemini) {
     if (!boxAI) return;
 
     boxAI.style.display = 'block';
-    boxAI.innerHTML = '<i>Sedang menganalisis siklus finansial bersama Gemini...</i>';
+    boxAI.innerHTML = '<i>Sedang memverifikasi kunci dan menghubungi server Google...</i>';
 
     const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
     const hutang = bacaData('artos_hutang', []).filter(h => !h.lunas);
@@ -655,58 +655,68 @@ if (btnKonsultasiGemini) {
     const riwayat = bacaData('catatan_uang', []).slice(-15);
 
     const promptData = {
-      saldoSaatIni: saldo,
-      utangPiutangAktif: hutang,
+      saldo: saldo,
+      pinjamanAktif: hutang,
       posTabungan: tabungan,
-      transaksiTerakhir: riwayat,
+      riwayatTransaksi: riwayat,
       kuotaHarian: batasHarianDinamis
     };
 
-    const instruksi = "Anda adalah Artos AI, konsultan keuangan pribadi. Berikan evaluasi anggaran, strategi melunasi utang jika ada, dan saran taktis belanja harian dalam 2 paragraf singkat padat:";
-    
-    // Model resmi dan stabil Google AI Studio
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const teksInstruksi = "Anda adalah Artos AI, konsultan keuangan pribadi. Berikan analisis kondisi keuangan berikut, solusi pengelolaan utang jika ada, dan rekomendasi belanja harian dalam 2 paragraf ringkas:";
 
     try {
-      const response = await fetch(url, {
+      // 1. Ambil daftar model resmi yang diizinkan untuk kunci API Anda
+      const cekModel = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const dataModel = await cekModel.json();
+
+      if (!cekModel.ok) {
+        const pesan = dataModel.error ? dataModel.error.message : 'Kunci API ditolak';
+        boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat Kunci (${cekModel.status}):</b> ${pesan}</span>`;
+        return;
+      }
+
+      // 2. Pilih model yang mendukung pembuatan teks
+      const daftar = dataModel.models || [];
+      const modelTersedia = daftar.find(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent') && m.name.includes('flash')) || daftar.find(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'));
+
+      if (!modelTersedia) {
+        boxAI.innerHTML = `<span style="color:#b91c1c;">Akun Anda belum memiliki akses ke model teks Gemini.</span>`;
+        return;
+      }
+
+      const namaEndpoint = modelTersedia.name; // Format bawaan: 'models/gemini-...'
+      boxAI.innerHTML = `<i>Menganalisis data via ${modelTersedia.displayName || namaEndpoint}...</i>`;
+
+      // 3. Kirim data keuangan ke model terpilih
+      const kirimData = await fetch(`https://generativelanguage.googleapis.com/v1beta/${namaEndpoint}:generateContent?key=${apiKey}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [
             {
-              role: 'user',
               parts: [
-                { text: instruksi + "\n\n" + JSON.stringify(promptData) }
+                { text: `${teksInstruksi}\n\n${JSON.stringify(promptData)}` }
               ]
             }
           ]
         })
       });
 
-      const resText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(resText);
-      } catch (e) {
-        boxAI.innerHTML = `<span style="color:#b91c1c;">Gagal membaca respons server: ${resText}</span>`;
+      const hasilAkhir = await kirimData.json();
+
+      if (!kirimData.ok) {
+        const galatKirim = hasilAkhir.error ? hasilAkhir.error.message : 'Gagal memproses data';
+        boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat Model (${kirimData.status}):</b> ${galatKirim}</span>`;
         return;
       }
 
-      if (!response.ok) {
-        const pesan = data.error ? data.error.message : 'Permintaan ditolak';
-        boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat (${response.status}):</b> ${pesan}</span>`;
-        return;
-      }
-
-      if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-        boxAI.innerText = data.candidates[0].content.parts[0].text;
+      if (hasilAkhir.candidates && hasilAkhir.candidates[0]?.content?.parts[0]?.text) {
+        boxAI.innerText = hasilAkhir.candidates[0].content.parts[0].text;
       } else {
-        boxAI.innerHTML = `<span style="color:#b91c1c;">Respons AI tidak berisi teks valid.</span>`;
+        boxAI.innerHTML = `<span style="color:#b91c1c;">Server tidak memberikan teks saran.</span>`;
       }
     } catch (err) {
-      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Kendala Jaringan / CORS:</b> ${err.message}. Coba matikan VPN bila aktif.</span>`;
+      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Kendala Koneksi:</b> ${err.message}. Pastikan jaringan internet lancar.</span>`;
     }
   });
 }
