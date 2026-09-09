@@ -1,3 +1,6 @@
+// ==========================================
+// 1. VARIABEL GLOBAL & INISIALISASI
+// ==========================================
 let batasHarianDinamis = 50000;
 let dompetTerpilih = 'tunai';
 let dompetHutangTerpilih = 'tunai';
@@ -5,6 +8,9 @@ let kategoriTerpilih = 'Rokok & Kopi';
 let tipeHutangTerpilih = 'piutang';
 let nominalInputString = '';
 
+// ==========================================
+// 2. FUNGSI PENYIMPANAN LOCALSTORAGE
+// ==========================================
 function bacaData(kunci, bawaan) {
   try {
     const item = localStorage.getItem(kunci);
@@ -22,6 +28,9 @@ function tulisData(kunci, nilai) {
   }
 }
 
+// ==========================================
+// 3. PENGELOLAAN SALDO DOMPET
+// ==========================================
 function siapkanSaldo() {
   let saldo = bacaData('artos_saldo', null);
   if (!saldo || typeof saldo !== 'object') {
@@ -33,14 +42,21 @@ function siapkanSaldo() {
 
 function renderTampilanSaldo() {
   const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-  document.getElementById('saldo-tunai').innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
-  document.getElementById('saldo-gopay').innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
-  document.getElementById('saldo-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
+  const elTunai = document.getElementById('saldo-tunai');
+  const elGopay = document.getElementById('saldo-gopay');
+  const elMandiri = document.getElementById('saldo-mandiri');
+
+  if (elTunai) elTunai.innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
+  if (elGopay) elGopay.innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
+  if (elMandiri) elMandiri.innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
 }
 
-// LOGIKA DISPLAY KEYPAD NUMERIK
+// ==========================================
+// 4. LOGIKA KEYPAD NUMERIK (NUMPAD)
+// ==========================================
 function updateDisplayNominal() {
   const elDisplay = document.getElementById('displayNominal');
+  if (!elDisplay) return;
   if (!nominalInputString || nominalInputString === '0') {
     elDisplay.innerText = 'Rp 0';
   } else {
@@ -55,7 +71,7 @@ function pasangKeypad() {
     btn.addEventListener('click', function() {
       const angka = this.getAttribute('data-num');
       if (nominalInputString === '' && (angka === '0' || angka === '000')) return;
-      if (nominalInputString.length >= 9) return; // Batas maksimal 9 digit
+      if (nominalInputString.length >= 9) return;
       nominalInputString += angka;
       updateDisplayNominal();
     });
@@ -71,15 +87,21 @@ function pasangKeypad() {
     });
   });
 
-  // Tombol Backspace (Hapus Digit)
-  document.getElementById('btnHapusDigit').addEventListener('click', function() {
-    if (nominalInputString.length > 0) {
-      nominalInputString = nominalInputString.slice(0, -1);
-      updateDisplayNominal();
-    }
-  });
+  // Tombol Hapus Digit (Backspace)
+  const btnHapus = document.getElementById('btnHapusDigit');
+  if (btnHapus) {
+    btnHapus.addEventListener('click', function() {
+      if (nominalInputString.length > 0) {
+        nominalInputString = nominalInputString.slice(0, -1);
+        updateDisplayNominal();
+      }
+    });
+  }
 }
 
+// ==========================================
+// 5. KALKULASI ANGGARAN HARIAN DINAMIS
+// ==========================================
 function hitungBatasHarianOtomatis() {
   const hutangList = bacaData('artos_hutang', []);
   let totalUtang = 0;
@@ -114,47 +136,92 @@ function hitungBatasHarianOtomatis() {
   if (badgeBatas) badgeBatas.innerText = `Maks: Rp ${batas.toLocaleString('id-ID')}`;
 }
 
+function renderDasbor() {
+  hitungBatasHarianOtomatis();
+  const logs = bacaData('catatan_uang', []);
+  const hariIni = new Date().toISOString().split('T')[0];
+
+  let keluarHariIni = 0;
+  logs.forEach(l => {
+    if (l.waktu && l.waktu.startsWith(hariIni) && l.jenis === 'Keluar' && l.kategori === 'Rokok & Kopi') {
+      keluarHariIni += l.nominal;
+    }
+  });
+
+  const sisa = batasHarianDinamis - keluarHariIni;
+  const teksKuota = document.getElementById('teksSisaKuota');
+  if (teksKuota) teksKuota.innerHTML = `<b>Rp ${sisa.toLocaleString('id-ID')}</b>`;
+
+  let persen = (keluarHariIni / batasHarianDinamis) * 100;
+  if (persen > 100) persen = 100;
+
+  const bar = document.getElementById('barKuota');
+  if (bar) {
+    bar.style.width = persen + '%';
+    if (persen > 90) bar.style.backgroundColor = '#b91c1c';
+    else if (persen > 70) bar.style.backgroundColor = '#d97706';
+    else bar.style.backgroundColor = '#2d6a4f';
+  }
+}
+
+// ==========================================
+// 6. LEMBAR SETELAN SALDO & KUNCI API
+// ==========================================
 const sheetSaldo = document.getElementById('sheetSaldo');
+const btnBukaSheetSaldo = document.getElementById('btnBukaSheetSaldo');
+const btnTutupSheet = document.getElementById('btnTutupSheet');
+const btnSimpanSemuaSaldo = document.getElementById('btnSimpanSemuaSaldo');
 
-document.getElementById('btnBukaSheetSaldo').addEventListener('click', function() {
-  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-  document.getElementById('inpSheetTunai').value = saldo.tunai || 0;
-  document.getElementById('inpSheetGopay').value = saldo.gopay || 0;
-  document.getElementById('inpSheetMandiri').value = saldo.mandiri || 0;
-  document.getElementById('inpApiKey').value = localStorage.getItem('artos_gemini_key') || '';
-  sheetSaldo.classList.add('open');
-});
+if (btnBukaSheetSaldo && sheetSaldo) {
+  btnBukaSheetSaldo.addEventListener('click', function() {
+    const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+    document.getElementById('inpSheetTunai').value = saldo.tunai || 0;
+    document.getElementById('inpSheetGopay').value = saldo.gopay || 0;
+    document.getElementById('inpSheetMandiri').value = saldo.mandiri || 0;
+    document.getElementById('inpApiKey').value = localStorage.getItem('artos_gemini_key') || '';
+    sheetSaldo.classList.add('open');
+  });
+}
 
-document.getElementById('btnTutupSheet').addEventListener('click', function() {
-  sheetSaldo.classList.remove('open');
-});
-
-sheetSaldo.addEventListener('click', function(e) {
-  if (e.target === sheetSaldo) {
+if (btnTutupSheet && sheetSaldo) {
+  btnTutupSheet.addEventListener('click', function() {
     sheetSaldo.classList.remove('open');
-  }
-});
+  });
+}
 
-document.getElementById('btnSimpanSemuaSaldo').addEventListener('click', function() {
-  const saldoBaru = {
-    tunai: parseInt(document.getElementById('inpSheetTunai').value) || 0,
-    gopay: parseInt(document.getElementById('inpSheetGopay').value) || 0,
-    mandiri: parseInt(document.getElementById('inpSheetMandiri').value) || 0
-  };
+if (sheetSaldo) {
+  sheetSaldo.addEventListener('click', function(e) {
+    if (e.target === sheetSaldo) {
+      sheetSaldo.classList.remove('open');
+    }
+  });
+}
 
-  const keyBaru = document.getElementById('inpApiKey').value.trim();
-  if (keyBaru) {
-    localStorage.setItem('artos_gemini_key', keyBaru);
-  }
+if (btnSimpanSemuaSaldo) {
+  btnSimpanSemuaSaldo.addEventListener('click', function() {
+    const saldoBaru = {
+      tunai: parseInt(document.getElementById('inpSheetTunai').value) || 0,
+      gopay: parseInt(document.getElementById('inpSheetGopay').value) || 0,
+      mandiri: parseInt(document.getElementById('inpSheetMandiri').value) || 0
+    };
 
-  tulisData('artos_saldo', saldoBaru);
-  sheetSaldo.classList.remove('open');
-  renderTampilanSaldo();
-  renderDasbor();
-  renderLaporan();
-  alert('Seluruh setelan dan saldo berhasil diperbarui.');
-});
+    const keyBaru = document.getElementById('inpApiKey').value.trim();
+    if (keyBaru) {
+      localStorage.setItem('artos_gemini_key', keyBaru);
+    }
 
+    tulisData('artos_saldo', saldoBaru);
+    if (sheetSaldo) sheetSaldo.classList.remove('open');
+    renderTampilanSaldo();
+    renderDasbor();
+    renderLaporan();
+    alert('Seluruh setelan dan saldo berhasil diperbarui.');
+  });
+}
+
+// ==========================================
+// 7. NAVIGASI TAB & PILIHAN INTERAKTIF
+// ==========================================
 function pasangNavigasi() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', function() {
@@ -169,7 +236,8 @@ function pasangNavigasi() {
       if (elTujuan) elTujuan.classList.add('active');
       this.classList.add('active');
 
-      document.getElementById('appHeader').innerHTML = `<i class="bi ${ikon}"></i> <span>${judul}</span>`;
+      const elHeader = document.getElementById('appHeader');
+      if (elHeader) elHeader.innerHTML = `<i class="bi ${ikon}"></i> <span>${judul}</span>`;
 
       if (tabTujuan === 'hutang') renderHutang();
       if (tabTujuan === 'riwayat') renderRiwayat();
@@ -215,101 +283,91 @@ function pasangPilihanKategori() {
   });
 }
 
-document.getElementById('btnInsentif').addEventListener('click', function() {
-  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-  saldo.tunai = (saldo.tunai || 0) + 15000;
-  tulisData('artos_saldo', saldo);
+// ==========================================
+// 8. TRANSAKSI PENGELUARAN & INSENTIF
+// ==========================================
+const btnInsentif = document.getElementById('btnInsentif');
+if (btnInsentif) {
+  btnInsentif.addEventListener('click', function() {
+    const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+    saldo.tunai = (saldo.tunai || 0) + 15000;
+    tulisData('artos_saldo', saldo);
 
-  const logs = bacaData('catatan_uang', []);
-  logs.push({ jenis: 'Masuk', kategori: 'Insentif Hadir', nominal: 15000, dompet: 'tunai', waktu: new Date().toISOString() });
-  tulisData('catatan_uang', logs);
+    const logs = bacaData('catatan_uang', []);
+    logs.push({ jenis: 'Masuk', kategori: 'Insentif Hadir', nominal: 15000, dompet: 'tunai', waktu: new Date().toISOString() });
+    tulisData('catatan_uang', logs);
 
-  renderTampilanSaldo();
-  alert('Insentif Rp 15.000 berhasil dicatat ke saldo Tunai.');
-});
-
-document.getElementById('btnSimpanPengeluaran').addEventListener('click', function() {
-  const nom = parseInt(nominalInputString);
-  if (!nom || nom <= 0) return alert('Silakan masukkan nominal pengeluaran melalui tombol angka.');
-
-  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-  if ((saldo[dompetTerpilih] || 0) < nom) return alert('Saldo ' + dompetTerpilih.toUpperCase() + ' tidak cukup.');
-
-  saldo[dompetTerpilih] -= nom;
-  tulisData('artos_saldo', saldo);
-
-  const logs = bacaData('catatan_uang', []);
-  logs.push({ jenis: 'Keluar', kategori: kategoriTerpilih, nominal: nom, dompet: dompetTerpilih, waktu: new Date().toISOString() });
-  tulisData('catatan_uang', logs);
-
-  // Reset display nominal
-  nominalInputString = '';
-  updateDisplayNominal();
-  renderTampilanSaldo();
-  renderDasbor();
-  alert('Pengeluaran berhasil dicatat.');
-});
-
-function renderDasbor() {
-  hitungBatasHarianOtomatis();
-  const logs = bacaData('catatan_uang', []);
-  const hariIni = new Date().toISOString().split('T')[0];
-
-  let keluarHariIni = 0;
-  logs.forEach(l => {
-    if (l.waktu && l.waktu.startsWith(hariIni) && l.jenis === 'Keluar' && l.kategori === 'Rokok & Kopi') {
-      keluarHariIni += l.nominal;
-    }
+    renderTampilanSaldo();
+    alert('Insentif Rp 15.000 berhasil dicatat ke saldo Tunai.');
   });
-
-  const sisa = batasHarianDinamis - keluarHariIni;
-  document.getElementById('teksSisaKuota').innerHTML = `<b>Rp ${sisa.toLocaleString('id-ID')}</b>`;
-
-  let persen = (keluarHariIni / batasHarianDinamis) * 100;
-  if (persen > 100) persen = 100;
-
-  const bar = document.getElementById('barKuota');
-  bar.style.width = persen + '%';
-  if (persen > 90) bar.style.backgroundColor = '#b91c1c';
-  else if (persen > 70) bar.style.backgroundColor = '#d97706';
-  else bar.style.backgroundColor = '#2d6a4f';
 }
 
-document.getElementById('btnSimpanHutang').addEventListener('click', function() {
-  const nama = document.getElementById('namaOrang').value.trim();
-  const nom = parseInt(document.getElementById('nominalHutang').value);
-  const tempo = document.getElementById('tglJatuhTempo').value;
+const btnSimpanPengeluaran = document.getElementById('btnSimpanPengeluaran');
+if (btnSimpanPengeluaran) {
+  btnSimpanPengeluaran.addEventListener('click', function() {
+    const nom = parseInt(nominalInputString);
+    if (!nom || nom <= 0) return alert('Silakan masukkan nominal pengeluaran melalui tombol angka.');
 
-  if (!nama || !nom || nom <= 0) return alert('Mohon lengkapi data transaksi.');
+    const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+    if ((saldo[dompetTerpilih] || 0) < nom) return alert('Saldo ' + dompetTerpilih.toUpperCase() + ' tidak cukup.');
 
-  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+    saldo[dompetTerpilih] -= nom;
+    tulisData('artos_saldo', saldo);
 
-  if (tipeHutangTerpilih === 'piutang') {
-    if ((saldo[dompetHutangTerpilih] || 0) < nom) return alert('Saldo tidak cukup untuk meminjamkan.');
-    saldo[dompetHutangTerpilih] -= nom;
-  } else {
-    saldo[dompetHutangTerpilih] = (saldo[dompetHutangTerpilih] || 0) + nom;
-  }
+    const logs = bacaData('catatan_uang', []);
+    logs.push({ jenis: 'Keluar', kategori: kategoriTerpilih, nominal: nom, dompet: dompetTerpilih, waktu: new Date().toISOString() });
+    tulisData('catatan_uang', logs);
 
-  tulisData('artos_saldo', saldo);
+    nominalInputString = '';
+    updateDisplayNominal();
+    renderTampilanSaldo();
+    renderDasbor();
+    alert('Pengeluaran berhasil dicatat.');
+  });
+}
 
-  const hutangList = bacaData('artos_hutang', []);
-  hutangList.push({ id: Date.now(), tipe: tipeHutangTerpilih, nama: nama, nominal: nom, dompet: dompetHutangTerpilih, tempo: tempo || null, lunas: false });
-  tulisData('artos_hutang', hutangList);
+// ==========================================
+// 9. PENGELOLAAN PINJAMAN (UTANG & PIUTANG)
+// ==========================================
+const btnSimpanHutang = document.getElementById('btnSimpanHutang');
+if (btnSimpanHutang) {
+  btnSimpanHutang.addEventListener('click', function() {
+    const nama = document.getElementById('namaOrang').value.trim();
+    const nom = parseInt(document.getElementById('nominalHutang').value);
+    const tempo = document.getElementById('tglJatuhTempo').value;
 
-  document.getElementById('namaOrang').value = '';
-  document.getElementById('nominalHutang').value = '';
-  document.getElementById('tglJatuhTempo').value = '';
+    if (!nama || !nom || nom <= 0) return alert('Mohon lengkapi data transaksi.');
 
-  renderTampilanSaldo();
-  renderHutang();
-  renderDasbor();
-  alert('Data berhasil dicatat. Sistem telah menyesuaikan batas anggaran harian Anda.');
-});
+    const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+
+    if (tipeHutangTerpilih === 'piutang') {
+      if ((saldo[dompetHutangTerpilih] || 0) < nom) return alert('Saldo tidak cukup untuk meminjamkan.');
+      saldo[dompetHutangTerpilih] -= nom;
+    } else {
+      saldo[dompetHutangTerpilih] = (saldo[dompetHutangTerpilih] || 0) + nom;
+    }
+
+    tulisData('artos_saldo', saldo);
+
+    const hutangList = bacaData('artos_hutang', []);
+    hutangList.push({ id: Date.now(), tipe: tipeHutangTerpilih, nama: nama, nominal: nom, dompet: dompetHutangTerpilih, tempo: tempo || null, lunas: false });
+    tulisData('artos_hutang', hutangList);
+
+    document.getElementById('namaOrang').value = '';
+    document.getElementById('nominalHutang').value = '';
+    document.getElementById('tglJatuhTempo').value = '';
+
+    renderTampilanSaldo();
+    renderHutang();
+    renderDasbor();
+    alert('Data berhasil dicatat. Sistem telah menyesuaikan batas anggaran harian Anda.');
+  });
+}
 
 function renderHutang() {
   const hutangList = bacaData('artos_hutang', []);
   const wadah = document.getElementById('wadahHutang');
+  if (!wadah) return;
   wadah.innerHTML = '';
 
   const aktif = hutangList.filter(h => !h.lunas);
@@ -377,9 +435,13 @@ function lunaskanPinjaman(id) {
   alert('Pinjaman berhasil dilunasi. Kuota harian Anda telah dikalkulasi ulang.');
 }
 
+// ==========================================
+// 10. RIWAYAT TRANSAKSI
+// ==========================================
 function renderRiwayat() {
   const logs = bacaData('catatan_uang', []);
   const wadah = document.getElementById('wadahRiwayat');
+  if (!wadah) return;
   wadah.innerHTML = '';
 
   if (logs.length === 0) {
@@ -404,17 +466,23 @@ function renderRiwayat() {
   });
 }
 
-document.getElementById('btnBukaTabungan').addEventListener('click', function() {
-  const nama = prompt('Nama Pos Tabungan (Cth: Mudik / Darurat):');
-  if (!nama) return;
-  const nom = parseInt(prompt('Nominal Dana Terkunci (Rp):', '0')) || 0;
+// ==========================================
+// 11. LAPORAN & POS TABUNGAN KHUSUS
+// ==========================================
+const btnBukaTabungan = document.getElementById('btnBukaTabungan');
+if (btnBukaTabungan) {
+  btnBukaTabungan.addEventListener('click', function() {
+    const nama = prompt('Nama Pos Tabungan (Cth: Mudik / Darurat):');
+    if (!nama) return;
+    const nom = parseInt(prompt('Nominal Dana Terkunci (Rp):', '0')) || 0;
 
-  const pos = bacaData('artos_tabungan', []);
-  pos.push({ id: Date.now(), nama: nama, saldo: nom });
-  tulisData('artos_tabungan', pos);
+    const pos = bacaData('artos_tabungan', []);
+    pos.push({ id: Date.now(), nama: nama, saldo: nom });
+    tulisData('artos_tabungan', pos);
 
-  renderLaporan();
-});
+    renderLaporan();
+  });
+}
 
 function renderLaporan() {
   const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
@@ -423,48 +491,58 @@ function renderLaporan() {
   const pos = bacaData('artos_tabungan', []);
   let totalTabung = 0;
   const wadahPos = document.getElementById('wadahPosTabungan');
-  wadahPos.innerHTML = '';
-
-  if (pos.length === 0) {
-    wadahPos.innerHTML = '<div style="font-size:0.85rem; color:#799484;">Belum ada pos tabungan terdaftar.</div>';
-  } else {
-    pos.forEach(p => {
-      totalTabung += p.saldo;
-      const div = document.createElement('div');
-      div.className = 'saving-box';
-      div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <b>${p.nama}</b>
-            <div style="color:#1a432f; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
+  if (wadahPos) {
+    wadahPos.innerHTML = '';
+    if (pos.length === 0) {
+      wadahPos.innerHTML = '<div style="font-size:0.85rem; color:#799484;">Belum ada pos tabungan terdaftar.</div>';
+    } else {
+      pos.forEach(p => {
+        totalTabung += p.saldo;
+        const div = document.createElement('div');
+        div.className = 'saving-box';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <b>${p.nama}</b>
+              <div style="color:#1a432f; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
+            </div>
           </div>
-        </div>
-      `;
-      const btnCair = document.createElement('button');
-      btnCair.className = 'btn-sm-tarik';
-      btnCair.innerText = 'Cairkan';
-      btnCair.onclick = function() {
-        const list = bacaData('artos_tabungan', []);
-        const idx = list.findIndex(i => i.id === p.id);
-        if (idx !== -1 && confirm(`Cairkan tabungan "${p.nama}" ke saldo bebas pakai?`)) {
-          list.splice(idx, 1);
-          tulisData('artos_tabungan', list);
-          renderLaporan();
-        }
-      };
-      div.firstElementChild.appendChild(btnCair);
-      wadahPos.appendChild(div);
-    });
+        `;
+        const btnCair = document.createElement('button');
+        btnCair.className = 'btn-sm-tarik';
+        btnCair.innerText = 'Cairkan';
+        btnCair.onclick = function() {
+          const list = bacaData('artos_tabungan', []);
+          const idx = list.findIndex(i => i.id === p.id);
+          if (idx !== -1 && confirm(`Cairkan tabungan "${p.nama}" ke saldo bebas pakai?`)) {
+            list.splice(idx, 1);
+            tulisData('artos_tabungan', list);
+            renderLaporan();
+          }
+        };
+        div.firstElementChild.appendChild(btnCair);
+        wadahPos.appendChild(div);
+      });
+    }
   }
 
   const uangBebas = totalKas - totalTabung;
-  document.getElementById('rep-uang-bebas').innerText = 'Rp ' + Number(uangBebas).toLocaleString('id-ID');
-  document.getElementById('rep-total-kas').innerText = 'Rp ' + Number(totalKas).toLocaleString('id-ID');
-  document.getElementById('rep-total-tabung').innerText = 'Rp ' + Number(totalTabung).toLocaleString('id-ID');
+  const elUangBebas = document.getElementById('rep-uang-bebas');
+  const elTotalKas = document.getElementById('rep-total-kas');
+  const elTotalTabung = document.getElementById('rep-total-tabung');
+  const elTunai = document.getElementById('rep-tunai');
+  const elGopay = document.getElementById('rep-gopay');
+  const elMandiri = document.getElementById('rep-mandiri');
+  const elPiutang = document.getElementById('rep-piutang');
+  const elHutang = document.getElementById('rep-hutang');
 
-  document.getElementById('rep-tunai').innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
-  document.getElementById('rep-gopay').innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
-  document.getElementById('rep-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
+  if (elUangBebas) elUangBebas.innerText = 'Rp ' + Number(uangBebas).toLocaleString('id-ID');
+  if (elTotalKas) elTotalKas.innerText = 'Rp ' + Number(totalKas).toLocaleString('id-ID');
+  if (elTotalTabung) elTotalTabung.innerText = 'Rp ' + Number(totalTabung).toLocaleString('id-ID');
+
+  if (elTunai) elTunai.innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
+  if (elGopay) elGopay.innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
+  if (elMandiri) elMandiri.innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
 
   const hutangList = bacaData('artos_hutang', []);
   let piutang = 0;
@@ -474,64 +552,157 @@ function renderLaporan() {
     if (h.tipe === 'hutang') hutang += h.nominal;
   });
 
-  document.getElementById('rep-piutang').innerText = 'Rp ' + Number(piutang).toLocaleString('id-ID');
-  document.getElementById('rep-hutang').innerText = 'Rp ' + Number(hutang).toLocaleString('id-ID');
+  if (elPiutang) elPiutang.innerText = 'Rp ' + Number(piutang).toLocaleString('id-ID');
+  if (elHutang) elHutang.innerText = 'Rp ' + Number(hutang).toLocaleString('id-ID');
 }
 
-document.getElementById('btnKonsultasiGemini').addEventListener('click', async function() {
-  const apiKey = localStorage.getItem('artos_gemini_key');
-  if (!apiKey) {
-    alert('Kunci API belum diisi. Silakan tekan ikon setelan di kanan atas untuk memasukkan Gemini API Key Anda.');
-    return;
-  }
+// ==========================================
+// 12. FITUR TRANSAKSI JASA TRANSFER
+// ==========================================
+const sheetTransfer = document.getElementById('sheetTransfer');
+const btnBukaJasaTransfer = document.getElementById('btnBukaJasaTransfer');
+const btnTutupTransfer = document.getElementById('btnTutupTransfer');
+const btnSimpanJasaTransfer = document.getElementById('btnSimpanJasaTransfer');
 
-  const boxAI = document.getElementById('wadahResponAI');
-  boxAI.style.display = 'block';
-  boxAI.innerHTML = '<i>Sedang menganalisis siklus keuangan Anda bersama Gemini...</i>';
+if (btnBukaJasaTransfer && sheetTransfer) {
+  btnBukaJasaTransfer.addEventListener('click', function() {
+    sheetTransfer.classList.add('open');
+  });
+}
 
-  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-  const hutang = bacaData('artos_hutang', []).filter(h => !h.lunas);
-  const tabungan = bacaData('artos_tabungan', []);
-  const riwayat = bacaData('catatan_uang', []).slice(-30);
+if (btnTutupTransfer && sheetTransfer) {
+  btnTutupTransfer.addEventListener('click', function() {
+    sheetTransfer.classList.remove('open');
+  });
+}
 
-  const promptData = {
-    saldoSaatIni: saldo,
-    utangPiutangAktif: hutang,
-    posTabunganTerkunci: tabungan,
-    ringkasanTransaksiTerakhir: riwayat,
-    batasHarianSaatIni: batasHarianDinamis
-  };
-
-  const systemInstruction = "Anda adalah konsultan keuangan pribadi cerdas bernama Artos AI. Berikan evaluasi kondisi finansial, strategi alokasi harian untuk melunasi utang, dan saran pengelolaan uang bebas pakai dalam 2-3 paragraf ringkas.";
-
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          role: "user",
-          parts: [
-            { text: systemInstruction + "\n\nData keuangan: " + JSON.stringify(promptData) }
-          ]
-        }]
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-      boxAI.innerText = data.candidates[0].content.parts[0].text;
-    } else if (data.error) {
-      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat API:</b> ${data.error.message}</span>`;
-    } else {
-      boxAI.innerHTML = `<span style="color:#b91c1c;">Format balasan server tidak dikenali.</span>`;
+if (sheetTransfer) {
+  sheetTransfer.addEventListener('click', function(e) {
+    if (e.target === sheetTransfer) {
+      sheetTransfer.classList.remove('open');
     }
-  } catch (err) {
-    boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Kendala Jaringan:</b> ${err.message}.</span>`;
-  }
-});
+  });
+}
 
+if (btnSimpanJasaTransfer) {
+  btnSimpanJasaTransfer.addEventListener('click', function() {
+    const nominal = parseInt(document.getElementById('inpTransferNominal').value) || 0;
+    const biayaAdmin = parseInt(document.getElementById('inpTransferAdmin').value) || 0;
+    const jenis = document.getElementById('selJenisTransfer').value;
+
+    if (nominal <= 0) return alert('Silakan masukkan nominal transfer yang valid.');
+
+    const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+    const logs = bacaData('catatan_uang', []);
+    const waktuSekarang = new Date().toISOString();
+
+    if (jenis === 'tarik') {
+      if ((saldo.tunai || 0) < nominal) return alert('Saldo Kas Tunai Anda tidak mencukupi untuk dicairkan.');
+      
+      saldo.mandiri = (saldo.mandiri || 0) + nominal;
+      saldo.tunai = (saldo.tunai || 0) - nominal + biayaAdmin;
+
+      logs.push({ jenis: 'Masuk', kategori: 'Jasa Transfer (Mandiri)', nominal: nominal, dompet: 'mandiri', waktu: waktuSekarang });
+      logs.push({ jenis: 'Keluar', kategori: 'Pencairan Tunai Pelanggan', nominal: nominal, dompet: 'tunai', waktu: waktuSekarang });
+      if (biayaAdmin > 0) {
+        logs.push({ jenis: 'Masuk', kategori: 'Keuntungan Admin Transfer', nominal: biayaAdmin, dompet: 'tunai', waktu: waktuSekarang });
+      }
+    } else {
+      if ((saldo.mandiri || 0) < nominal) return alert('Saldo Bank Mandiri Anda tidak cukup untuk melakukan transfer.');
+
+      saldo.mandiri = (saldo.mandiri || 0) - nominal;
+      saldo.tunai = (saldo.tunai || 0) + nominal + biayaAdmin;
+
+      logs.push({ jenis: 'Keluar', kategori: 'Jasa Transfer (Mandiri)', nominal: nominal, dompet: 'mandiri', waktu: waktuSekarang });
+      logs.push({ jenis: 'Masuk', kategori: 'Penerimaan Tunai Pelanggan', nominal: nominal + biayaAdmin, dompet: 'tunai', waktu: waktuSekarang });
+    }
+
+    tulisData('artos_saldo', saldo);
+    tulisData('catatan_uang', logs);
+
+    document.getElementById('inpTransferNominal').value = '';
+    if (sheetTransfer) sheetTransfer.classList.remove('open');
+
+    renderTampilanSaldo();
+    renderDasbor();
+    renderLaporan();
+    alert(`Transaksi berhasil! Biaya admin sebesar Rp ${biayaAdmin.toLocaleString('id-ID')} masuk sebagai laba.`);
+  });
+}
+
+// ==========================================
+// 13. KONSULTAN FINANSIAL AI (GEMINI 1.5 FLASH)
+// ==========================================
+const btnKonsultasiGemini = document.getElementById('btnKonsultasiGemini');
+if (btnKonsultasiGemini) {
+  btnKonsultasiGemini.addEventListener('click', async function() {
+    const rawKey = localStorage.getItem('artos_gemini_key');
+    if (!rawKey || rawKey.trim() === '') {
+      alert('Kunci API belum diisi. Silakan tekan ikon setelan di kanan atas untuk memasukkan Gemini API Key Anda.');
+      return;
+    }
+
+    const apiKey = rawKey.trim();
+    const boxAI = document.getElementById('wadahResponAI');
+    if (!boxAI) return;
+    boxAI.style.display = 'block';
+    boxAI.innerHTML = '<i>Sedang menganalisis siklus keuangan Anda bersama Gemini...</i>';
+
+    const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+    const hutang = bacaData('artos_hutang', []).filter(h => !h.lunas);
+    const tabungan = bacaData('artos_tabungan', []);
+    const riwayat = bacaData('catatan_uang', []).slice(-30);
+
+    const promptData = {
+      saldoSaatIni: saldo,
+      utangPiutangAktif: hutang,
+      posTabunganTerkunci: tabungan,
+      ringkasanTransaksiTerakhir: riwayat,
+      batasHarianSaatIni: batasHarianDinamis
+    };
+
+    const teksInstruksi = "Peran Anda adalah konsultan keuangan pribadi cerdas bernama Artos AI. Evaluasi data keuangan berikut. Berikan saran taktis pemangkasan pengeluaran harian, strategi pelunasan utang jika ada, dan cara mengamankan tabungan dalam 2-3 paragraf ringkas:";
+    const urlEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(urlEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: `${teksInstruksi}\n\n${JSON.stringify(promptData)}` }
+              ]
+            }
+          ]
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const pesanGalat = data.error ? data.error.message : 'Permintaan ditolak oleh server.';
+        boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat (${response.status}):</b> ${pesanGalat}</span>`;
+        return;
+      }
+
+      if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+        boxAI.innerText = data.candidates[0].content.parts[0].text;
+      } else {
+        boxAI.innerHTML = `<span style="color:#b91c1c;">Server tidak mengirimkan teks analisis yang valid.</span>`;
+      }
+    } catch (err) {
+      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Kendala Koneksi:</b> ${err.message}. Periksa jaringan internet Anda.</span>`;
+    }
+  });
+}
+
+// ==========================================
+// 14. INISIALISASI SAAT HALAMAN DIMUAT
+// ==========================================
 window.addEventListener('DOMContentLoaded', function() {
   siapkanSaldo();
   pasangNavigasi();
