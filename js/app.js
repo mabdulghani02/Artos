@@ -754,3 +754,36 @@ window.addEventListener('DOMContentLoaded', () => {
   kirimDataKeWidgetAndroid();
 });
 
+// ==========================================
+// PENGIRIM DATA UNTUK KWGT
+// ==========================================
+function perbaruiDataUntukKWGT() {
+  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+  const logs = bacaData('catatan_uang', []);
+  const hariIni = new Date().toISOString().split('T')[0];
+
+  let keluarHariIni = 0;
+  logs.forEach(l => {
+    if (l.waktu && l.waktu.startsWith(hariIni) && l.jenis === 'Keluar') {
+      keluarHariIni += Number(l.nominal) || 0;
+    }
+  });
+
+  const limitHarian = typeof batasHarianDinamis !== 'undefined' ? batasHarianDinamis : 50000;
+  const sisaLimit = Math.max(0, limitHarian - keluarHariIni);
+
+  const payloadKWGT = {
+    tunai: Number(saldo.tunai) || 0,
+    gopay: Number(saldo.gopay) || 0,
+    mandiri: Number(saldo.mandiri) || 0,
+    limit: sisaLimit,
+    waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+  };
+
+  // Simpan dalam format JSON string di localStorage
+  localStorage.setItem('artos_kwgt_data', JSON.stringify(payloadKWGT));
+
+  // Jika Anda memakai Capacitor atau browser Android, salin ke clipboard tersembunyi
+  // atau unduh berkas kecil bernama artos_data.json ke folder Download
+  console.log("Data KWGT diperbarui:", payloadKWGT);
+}
