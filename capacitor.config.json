@@ -1,0 +1,6 @@
+{
+  "appId": "com.artos.keuangan",
+  "appName": "Artos",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
