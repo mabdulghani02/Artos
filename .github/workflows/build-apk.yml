@@ -16,32 +16,36 @@ jobs:
       - name: Siapkan Lingkungan Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Siapkan Java JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: 17
 
-      - name: Pasang Modul Capacitor
+      - name: Siapkan Berkas Web Artos
+        run: |
+          mkdir -p dist
+          cp -r index.html css js dist/ 2>/dev/null || cp index.html dist/
+          [ -d "css" ] && cp -r css dist/ || true
+          [ -d "js" ] && cp -r js dist/ || true
+
+      - name: Pasang Modul dan Inisialisasi Android
         run: |
           npm init -y
-          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
-          npx cap init Artos com.artos.finance --web-dir .
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init Artos com.artos.finance --web-dir dist
           npx cap add android
-
-      - name: Sinkronisasi Web ke Android
-        run: |
           npx cap sync android
 
-      - name: Kompilasi APK (Gradle)
+      - name: Kompilasi APK dengan Gradle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Unggah Berkas APK
+      - name: Unggah Artefak APK
         uses: actions/upload-artifact@v4
         with:
           name: Artos-Finansial-Debug-APK
