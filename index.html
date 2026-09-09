@@ -14,19 +14,20 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: #f8fafc;
-      color: #0f172a;
+      background-color: #f2f6f3;
+      color: #172d21;
       padding-bottom: 85px;
     }
     .header {
-      background-color: #2563eb;
-      color: white;
+      background-color: #1f4e38;
+      color: #eaf2ec;
       padding: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       font-weight: 600;
       font-size: 1.1rem;
+      border-bottom: 1px solid #163a2a;
     }
     .header-title {
       display: flex;
@@ -36,7 +37,7 @@
     .btn-icon-head {
       background: none;
       border: none;
-      color: white;
+      color: #eaf2ec;
       font-size: 1.3rem;
       cursor: pointer;
       padding: 4px;
@@ -48,8 +49,8 @@
       background: #ffffff;
       padding: 16px;
       border-radius: 14px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #dce6df;
+      box-shadow: 0 1px 3px rgba(22, 58, 42, 0.05);
       margin-bottom: 14px;
     }
     .wallet-scroll {
@@ -63,7 +64,7 @@
       min-width: 110px;
       flex: 1;
       background: white;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dce6df;
       border-radius: 12px;
       padding: 10px;
       display: flex;
@@ -77,22 +78,22 @@
       align-items: center;
       gap: 6px;
     }
-    .icon-tunai { color: #16a34a; }
-    .icon-gopay { color: #00aed6; }
-    .icon-mandiri { color: #003d79; }
+    .icon-tunai { color: #2d6a4f; }
+    .icon-gopay { color: #0087a3; }
+    .icon-mandiri { color: #1e3a5f; }
     .wallet-val {
       font-weight: bold;
       font-size: 0.95rem;
     }
     .progress-bar-bg {
-      background-color: #f1f5f9;
+      background-color: #e5ece7;
       height: 8px;
       border-radius: 4px;
       margin: 10px 0 6px 0;
       overflow: hidden;
     }
     .progress-bar-fill {
-      background-color: #10b981;
+      background-color: #2d6a4f;
       height: 100%;
       width: 0%;
       transition: width 0.3s ease;
@@ -109,18 +110,18 @@
       justify-content: center;
       gap: 6px;
       padding: 10px 4px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #cbd8d0;
       border-radius: 8px;
       font-size: 0.8rem;
       font-weight: 600;
       background: white;
-      color: #64748b;
+      color: #526b5d;
       cursor: pointer;
     }
     .wallet-btn.active {
-      border-color: #2563eb;
-      background: #eff6ff;
-      color: #2563eb;
+      border-color: #245e43;
+      background: #e3ede6;
+      color: #1f4e38;
     }
     .input-wrapper {
       position: relative;
@@ -131,26 +132,28 @@
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: #94a3b8;
+      color: #799484;
       font-size: 1.2rem;
     }
     .input-wrapper input {
       width: 100%;
       padding: 12px 12px 12px 42px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #cbd8d0;
       border-radius: 10px;
       font-size: 16px;
       font-weight: 600;
       outline: none;
+      color: #172d21;
     }
     .form-input-plain {
       width: 100%;
       padding: 12px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #cbd8d0;
       border-radius: 10px;
       font-size: 15px;
       outline: none;
       margin-bottom: 12px;
+      color: #172d21;
     }
     .quick-nominal {
       display: flex;
@@ -161,12 +164,12 @@
       flex: 1;
       text-align: center;
       padding: 10px 0;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
+      background: #e8f0ea;
+      border: 1px solid #d3ded6;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
-      color: #475569;
+      color: #2d5a42;
       cursor: pointer;
     }
     .category-grid {
@@ -182,28 +185,28 @@
       justify-content: center;
       gap: 6px;
       padding: 12px 4px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dce6df;
       border-radius: 10px;
       background: #ffffff;
-      color: #475569;
+      color: #526b5d;
       font-size: 0.75rem;
       font-weight: 500;
       cursor: pointer;
     }
     .cat-btn i {
       font-size: 1.3rem;
-      color: #2563eb;
+      color: #245e43;
     }
     .cat-btn.active {
-      background-color: #eff6ff;
-      border-color: #2563eb;
-      color: #2563eb;
+      background-color: #e3ede6;
+      border-color: #245e43;
+      color: #1f4e38;
       font-weight: 700;
     }
     .btn-primary {
       width: 100%;
-      background: #2563eb;
-      color: white;
+      background: #245e43;
+      color: #ffffff;
       border: none;
       padding: 14px;
       border-radius: 10px;
@@ -215,9 +218,12 @@
       gap: 8px;
       cursor: pointer;
     }
+    .btn-primary:active {
+      background: #194430;
+    }
     .btn-success {
       width: 100%;
-      background: #10b981;
+      background: #2d6a4f;
       color: white;
       border: none;
       padding: 12px;
@@ -230,8 +236,11 @@
       margin-bottom: 14px;
       cursor: pointer;
     }
+    .btn-success:active {
+      background: #1b4332;
+    }
     .btn-sm-lunas {
-      background: #10b981;
+      background: #2d6a4f;
       color: white;
       border: none;
       padding: 6px 12px;
@@ -241,7 +250,7 @@
       cursor: pointer;
     }
     .btn-sm-tarik {
-      background: #ef4444;
+      background: #b91c1c;
       color: white;
       border: none;
       padding: 6px 10px;
@@ -257,8 +266,8 @@
       height: 65px;
       background: #ffffff;
       display: flex;
-      border-top: 1px solid #e2e8f0;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      border-top: 1px solid #dce6df;
+      box-shadow: 0 -2px 10px rgba(22, 58, 42, 0.04);
       z-index: 10;
     }
     .nav-item {
@@ -269,27 +278,27 @@
       justify-content: center;
       gap: 4px;
       font-size: 0.75rem;
-      color: #94a3b8;
+      color: #799484;
       cursor: pointer;
       user-select: none;
     }
     .nav-item i { font-size: 1.25rem; }
     .nav-item.active {
-      color: #2563eb;
-      font-weight: 600;
+      color: #1f4e38;
+      font-weight: 700;
     }
     .page { display: none; }
     .page.active { display: block; }
     .list-item {
       padding: 12px 0;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid #eef3f0;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .debt-card {
       padding: 12px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dce6df;
       border-radius: 10px;
       margin-bottom: 10px;
       display: flex;
@@ -299,7 +308,7 @@
     .overdue-badge {
       display: inline-block;
       background-color: #fee2e2;
-      color: #dc2626;
+      color: #b91c1c;
       font-size: 0.7rem;
       font-weight: bold;
       padding: 2px 6px;
@@ -307,8 +316,8 @@
       margin-left: 4px;
     }
     .saving-box {
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
+      background: #f7faf8;
+      border: 1px dashed #cbd8d0;
       border-radius: 10px;
       padding: 10px;
       margin-top: 10px;
@@ -322,7 +331,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(15, 23, 42, 0.6);
+      background-color: rgba(23, 45, 33, 0.6);
       z-index: 99;
       align-items: flex-end;
       justify-content: center;
@@ -346,7 +355,7 @@
     .field-label {
       font-size: 0.85rem;
       font-weight: 600;
-      color: #475569;
+      color: #3b5a48;
       margin-bottom: 6px;
       display: flex;
       align-items: center;
@@ -385,10 +394,10 @@
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size: 0.85rem; color:#64748b;">Sisa Kuota Harian</span>
-        <span style="font-size: 0.75rem; color:#94a3b8;"><i class="bi bi-shield-check"></i> Maks 50rb</span>
+        <span style="font-size: 0.85rem; color:#526b5d;">Sisa Kuota Harian</span>
+        <span style="font-size: 0.75rem; color:#799484;"><i class="bi bi-shield-check"></i> Maks 50rb</span>
       </div>
-      <div id="teksSisaKuota" style="font-size: 1.4rem; margin-top:4px;"><b>Rp 50.000</b></div>
+      <div id="teksSisaKuota" style="font-size: 1.4rem; margin-top:4px; color:#172d21;"><b>Rp 50.000</b></div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="barKuota"></div>
       </div>
@@ -399,7 +408,7 @@
     </button>
 
     <div class="card">
-      <span style="font-size:0.85rem; font-weight:600; color:#64748b; margin-bottom:8px; display:block;">Pilih Dompet</span>
+      <span style="font-size:0.85rem; font-weight:600; color:#526b5d; margin-bottom:8px; display:block;">Pilih Dompet</span>
       <div class="wallet-select-group" id="group-dompet">
         <div class="wallet-btn active" data-val="tunai">
           <i class="bi bi-cash icon-tunai"></i> Tunai
@@ -460,7 +469,7 @@
   <!-- TAB 2: PINJAMAN -->
   <div id="page-hutang" class="page container">
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-plus-circle"></i> Tambah Pinjaman</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-plus-circle"></i> Tambah Pinjaman</h3>
       
       <div class="wallet-select-group" id="group-tipe-ht">
         <div class="wallet-btn active" id="btn-tipe-piutang" data-tipe="piutang">
@@ -474,10 +483,10 @@
       <input type="text" id="namaOrang" class="form-input-plain" placeholder="Nama Pihak / Teman">
       <input type="number" id="nominalHutang" class="form-input-plain" placeholder="Nominal (Rp)">
 
-      <label style="font-size:0.8rem; font-weight:600; color:#64748b; margin-bottom:4px; display:block;">Jatuh Tempo:</label>
+      <label style="font-size:0.8rem; font-weight:600; color:#526b5d; margin-bottom:4px; display:block;">Jatuh Tempo:</label>
       <input type="date" id="tglJatuhTempo" class="form-input-plain">
 
-      <span style="font-size:0.8rem; color:#64748b; display:block; margin-bottom:6px;">Gunakan Saldo:</span>
+      <span style="font-size:0.8rem; color:#526b5d; display:block; margin-bottom:6px;">Gunakan Saldo:</span>
       <div class="wallet-select-group" id="group-dompet-ht">
         <div class="wallet-btn active" data-val="tunai">Tunai</div>
         <div class="wallet-btn" data-val="gopay">GoPay</div>
@@ -490,7 +499,7 @@
     </div>
 
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-list-task"></i> Daftar Aktif</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-list-task"></i> Daftar Aktif</h3>
       <div id="wadahHutang">Belum ada catatan.</div>
     </div>
   </div>
@@ -498,14 +507,14 @@
   <!-- TAB 3: RIWAYAT -->
   <div id="page-riwayat" class="page container">
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-journal-text"></i> Transaksi Terkini</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-journal-text"></i> Transaksi Terkini</h3>
       <div id="wadahRiwayat">Belum ada mutasi.</div>
     </div>
   </div>
 
   <!-- TAB 4: LAPORAN -->
   <div id="page-laporan" class="page container">
-    <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white;">
+    <div class="card" style="background: linear-gradient(135deg, #163a2a, #245e43); color: white;">
       <div style="font-size: 0.85rem; opacity: 0.9;">Uang Bebas Pakai</div>
       <div id="rep-uang-bebas" style="font-size: 1.7rem; font-weight: bold; margin: 4px 0 10px 0;">Rp 0</div>
       <div style="font-size: 0.8rem; opacity: 0.85; display: flex; justify-content: space-between;">
@@ -516,19 +525,19 @@
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0; font-size:1.05rem;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
-        <button id="btnBukaTabungan" style="background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
+        <h3 style="margin:0; font-size:1.05rem; color:#172d21;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
+        <button id="btnBukaTabungan" style="background:#e8f0ea; border:1px solid #cbd8d0; color:#1f4e38; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
       </div>
       <div id="wadahPosTabungan">Belum ada pos tabungan.</div>
     </div>
 
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem;"><i class="bi bi-bar-chart-line"></i> Saldo Dompet & Hutang</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-bar-chart-line"></i> Saldo Dompet & Hutang</h3>
       <div class="list-item"><span><i class="bi bi-cash icon-tunai"></i> Kas Tunai</span> <span id="rep-tunai">Rp 0</span></div>
       <div class="list-item"><span><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay</span> <span id="rep-gopay">Rp 0</span></div>
       <div class="list-item"><span><i class="bi bi-bank2 icon-mandiri"></i> Bank Mandiri</span> <span id="rep-mandiri">Rp 0</span></div>
       <div class="list-item" style="color:#0284c7;"><span>Piutang Belum Lunas</span> <span id="rep-piutang">Rp 0</span></div>
-      <div class="list-item" style="color:#ef4444;"><span>Hutang Belum Lunas</span> <span id="rep-hutang">Rp 0</span></div>
+      <div class="list-item" style="color:#b91c1c;"><span>Hutang Belum Lunas</span> <span id="rep-hutang">Rp 0</span></div>
     </div>
   </div>
 
@@ -536,10 +545,10 @@
   <div class="sheet-overlay" id="sheetSaldo">
     <div class="sheet-container">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
-          <i class="bi bi-sliders text-primary"></i> Sesuaikan Seluruh Saldo
+        <h3 style="margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px; color:#172d21;">
+          <i class="bi bi-sliders" style="color:#245e43;"></i> Sesuaikan Seluruh Saldo
         </h3>
-        <button id="btnTutupSheet" style="background:none; border:none; font-size:1.3rem; color:#64748b; cursor:pointer;">
+        <button id="btnTutupSheet" style="background:none; border:none; font-size:1.3rem; color:#799484; cursor:pointer;">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -625,7 +634,6 @@
       document.getElementById('saldo-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
     }
 
-    // Alur Lembar Saldo Terpadu
     const sheetSaldo = document.getElementById('sheetSaldo');
 
     document.getElementById('btnBukaSheetSaldo').addEventListener('click', function() {
@@ -780,9 +788,9 @@
 
       const bar = document.getElementById('barKuota');
       bar.style.width = persen + '%';
-      if (persen > 90) bar.style.backgroundColor = '#ef4444';
-      else if (persen > 70) bar.style.backgroundColor = '#f59e0b';
-      else bar.style.backgroundColor = '#10b981';
+      if (persen > 90) bar.style.backgroundColor = '#b91c1c';
+      else if (persen > 70) bar.style.backgroundColor = '#d97706';
+      else bar.style.backgroundColor = '#2d6a4f';
     }
 
     document.getElementById('btnSimpanHutang').addEventListener('click', function() {
@@ -833,12 +841,12 @@
         const div = document.createElement('div');
         div.className = 'debt-card';
         const label = h.tipe === 'piutang' ? 'Piutang ke' : 'Hutang dari';
-        const warna = h.tipe === 'piutang' ? '#0284c7' : '#ef4444';
+        const warna = h.tipe === 'piutang' ? '#0284c7' : '#b91c1c';
 
         let tglInfo = '';
         if (h.tempo) {
           const lewat = h.tempo < hariIni;
-          tglInfo = `<div style="font-size:0.75rem; color:#64748b; margin-top:2px;">Tempo: ${h.tempo} ${lewat ? '<span class="overdue-badge">Lewat</span>' : ''}</div>`;
+          tglInfo = `<div style="font-size:0.75rem; color:#526b5d; margin-top:2px;">Tempo: ${h.tempo} ${lewat ? '<span class="overdue-badge">Lewat</span>' : ''}</div>`;
         }
 
         div.innerHTML = `
@@ -899,12 +907,12 @@
         const div = document.createElement('div');
         div.className = 'list-item';
         const tanda = l.jenis === 'Masuk' ? '+' : '-';
-        const warna = l.jenis === 'Masuk' ? '#10b981' : '#ef4444';
+        const warna = l.jenis === 'Masuk' ? '#2d6a4f' : '#b91c1c';
 
         div.innerHTML = `
           <div>
             <div><b>${l.kategori}</b></div>
-            <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase;">${l.dompet}</div>
+            <div style="font-size:0.75rem; color:#799484; text-transform:uppercase;">${l.dompet}</div>
           </div>
           <span style="color:${warna}; font-weight:600;">${tanda} Rp ${l.nominal.toLocaleString('id-ID')}</span>
         `;
@@ -934,7 +942,7 @@
       wadahPos.innerHTML = '';
 
       if (pos.length === 0) {
-        wadahPos.innerHTML = '<div style="font-size:0.85rem; color:#94a3b8;">Belum ada pos tabungan terdaftar.</div>';
+        wadahPos.innerHTML = '<div style="font-size:0.85rem; color:#799484;">Belum ada pos tabungan terdaftar.</div>';
       } else {
         pos.forEach(p => {
           totalTabung += p.saldo;
@@ -944,7 +952,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <b>${p.nama}</b>
-                <div style="color:#2563eb; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
+                <div style="color:#245e43; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
               </div>
             </div>
           `;
