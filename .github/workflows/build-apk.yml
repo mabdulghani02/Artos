@@ -19,7 +19,7 @@ jobs:
           node-version: 22
 
       - name: Siapkan Java JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
@@ -41,34 +41,36 @@ jobs:
 
       - name: Pasang Komponen Widget dan Sembulan Lembaran Uang
         run: |
-          node -e '
-          const fs = require("fs");
+          mkdir -p android/app/src/main/res/layout
+          mkdir -p android/app/src/main/res/xml
+          mkdir -p android/app/src/main/res/drawable
+          mkdir -p android/app/src/main/java/com/artos/finance
 
-          fs.mkdirSync("android/app/src/main/res/layout", { recursive: true });
-          fs.mkdirSync("android/app/src/main/res/xml", { recursive: true });
-          fs.mkdirSync("android/app/src/main/res/drawable", { recursive: true });
-          fs.mkdirSync("android/app/src/main/java/com/artos/finance", { recursive: true });
-
-          // 1. Gambar latar belakang widget dan tombol
-          fs.writeFileSync("android/app/src/main/res/drawable/widget_bg.xml", `<?xml version="1.0" encoding="utf-8"?>
+          # 1. Drawable Latar
+          cat << 'EOF' > android/app/src/main/res/drawable/widget_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android">
               <solid android:color="#0f172a" />
               <corners android:radius="20dp" />
               <stroke android:width="1dp" android:color="#1e293b" />
-          </shape>`);
+          </shape>
+          EOF
 
-          fs.writeFileSync("android/app/src/main/res/drawable/btn_pecahan_bg.xml", `<?xml version="1.0" encoding="utf-8"?>
+          cat << 'EOF' > android/app/src/main/res/drawable/btn_pecahan_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android">
               <solid android:color="#1e293b" />
               <corners android:radius="10dp" />
               <stroke android:width="1dp" android:color="#334155" />
-          </shape>`);
+          </shape>
+          EOF
 
-          // 2. Tata letak widget_artos.xml
-          const widgetLayout = `<?xml version="1.0" encoding="utf-8"?>
+          # 2. Tata Letak Widget
+          cat << 'EOF' > android/app/src/main/res/layout/widget_artos.xml
+          <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:layout_height="wrap_content"
               android:orientation="vertical"
               android:padding="14dp"
               android:background="@drawable/widget_bg">
@@ -76,8 +78,7 @@ jobs:
               <LinearLayout
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:gravity="center_vertical">
+                  android:orientation="horizontal">
                   <TextView
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
@@ -98,10 +99,8 @@ jobs:
 
               <LinearLayout
                   android:layout_width="match_parent"
-                  android:layout_height="0dp"
-                  android:layout_weight="1"
+                  android:layout_height="wrap_content"
                   android:orientation="horizontal"
-                  android:gravity="center_vertical"
                   android:weightSum="3"
                   android:layout_marginTop="8dp"
                   android:layout_marginBottom="8dp">
@@ -178,23 +177,24 @@ jobs:
                   android:textColor="#ffffff"
                   android:background="@drawable/btn_pecahan_bg"
                   android:textSize="11sp" />
-          </LinearLayout>`;
-          fs.writeFileSync("android/app/src/main/res/layout/widget_artos.xml", widgetLayout);
+          </LinearLayout>
+          EOF
 
-          // 3. Konfigurasi artos_widget_info.xml
-          fs.writeFileSync("android/app/src/main/res/xml/artos_widget_info.xml", `<?xml version="1.0" encoding="utf-8"?>
+          # 3. Metadata Widget
+          cat << 'EOF' > android/app/src/main/res/xml/artos_widget_info.xml
+          <?xml version="1.0" encoding="utf-8"?>
           <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
               android:minWidth="260dp"
               android:minHeight="90dp"
-              android:targetCellWidth="3"
-              android:targetCellHeight="2"
               android:updatePeriodMillis="1800000"
               android:initialLayout="@layout/widget_artos"
               android:resizeMode="horizontal|vertical"
-              android:widgetCategory="home_screen" />`);
+              android:widgetCategory="home_screen" />
+          EOF
 
-          // 4. Tata letak dialog_quick_input.xml
-          const popupLayout = `<?xml version="1.0" encoding="utf-8"?>
+          # 4. Tata Letak Dialog Sembulan Uang
+          cat << 'EOF' > android/app/src/main/res/layout/dialog_quick_input.xml
+          <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
@@ -229,6 +229,221 @@ jobs:
                       android:id="@+id/btn100k"
                       android:layout_width="0dp"
                       android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="4dp"
+                      android:text="+100 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="11sp" />
+                  <Button
+                      android:id="@+id/btn50k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="4dp"
+                      android:text="+50 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="11sp" />
+                  <Button
+                      android:id="@+id/btn20k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:text="+20 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="11sp" />
+              </LinearLayout>
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:weightSum="4"
+                  android:layout_marginBottom="16dp">
+                  <Button
+                      android:id="@+id/btn10k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="3dp"
+                      android:text="+10 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+                  <Button
+                      android:id="@+id/btn5k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="3dp"
+                      android:text="+5 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+                  <Button
+                      android:id="@+id/btn2k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="3dp"
+                      android:text="+2 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+                  <Button
+                      android:id="@+id/btn1k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:text="+1 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+              </LinearLayout>
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+                  <Button
+                      android:id="@+id/btnResetHitungan"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="8dp"
+                      android:text="Ulangi"
+                      android:textColor="#ef4444"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="12sp" />
+                  <Button
+                      android:id="@+id/btnKonfirmasiPotong"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="2"
+                      android:text="Simpan"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textStyle="bold"
+                      android:textSize="12sp" />
+              </LinearLayout>
+          </LinearLayout>
+          EOF
+
+          # 5. Java: QuickInputActivity
+          cat << 'EOF' > android/app/src/main/java/com/artos/finance/QuickInputActivity.java
+          package com.artos.finance;
+
+          import android.app.Activity;
+          import android.appwidget.AppWidgetManager;
+          import android.content.ComponentName;
+          import android.content.Context;
+          import android.content.SharedPreferences;
+          import android.os.Bundle;
+          import android.widget.Button;
+          import android.widget.TextView;
+          import java.text.NumberFormat;
+          import java.util.Locale;
+
+          public class QuickInputActivity extends Activity {
+              private long totalAkumulasi = 0;
+              private TextView tvTotal;
+              private NumberFormat fmt;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.layout.dialog_quick_input);
+
+                  fmt = NumberFormat.getNumberInstance(new Locale("id", "ID"));
+                  tvTotal = findViewById(R.id.tvTotalAkumulasi);
+
+                  findViewById(R.id.btn100k).setOnClickListener(v -> tambahNominal(100000));
+                  findViewById(R.id.btn50k).setOnClickListener(v -> tambahNominal(50000));
+                  findViewById(R.id.btn20k).setOnClickListener(v -> tambahNominal(20000));
+                  findViewById(R.id.btn10k).setOnClickListener(v -> tambahNominal(10000));
+                  findViewById(R.id.btn5k).setOnClickListener(v -> tambahNominal(5000));
+                  findViewById(R.id.btn2k).setOnClickListener(v -> tambahNominal(2000));
+                  findViewById(R.id.btn1k).setOnClickListener(v -> tambahNominal(1000));
+
+                  findViewById(R.id.btnResetHitungan).setOnClickListener(v -> {
+                      totalAkumulasi = 0;
+                      perbaruiTampilan();
+                  });
+
+                  findViewById(R.id.btnKonfirmasiPotong).setOnClickListener(v -> {
+                      if (totalAkumulasi > 0) {
+                          SharedPreferences pref = getSharedPreferences("ArtosWidgetData", Context.MODE_PRIVATE);
+                          long tunai = pref.getLong("saldo_tunai", 0);
+                          long limit = pref.getLong("sisa_limit", 50000);
+
+                          pref.edit()
+                              .putLong("saldo_tunai", Math.max(0, tunai - totalAkumulasi))
+                              .putLong("sisa_limit", Math.max(0, limit - totalAkumulasi))
+                              .apply();
+
+                          AppWidgetManager mgr = AppWidgetManager.getInstance(this);
+                          ComponentName cn = new ComponentName(this, ArtosWidgetProvider.class);
+                          int[] ids = mgr.getAppWidgetIds(cn);
+                          ArtosWidgetProvider.perbaruiSemuaWidget(this, mgr, ids);
+                      }
+                      finish();
+                  });
+              }
+
+              private void tambahNominal(long nilai) {
+                  totalAkumulasi += nilai;
+                  perbaruiTampilan();
+              }
+
+              private void perbaruiTampilan() {
+                  tvTotal.setText("Rp " + fmt.format(totalAkumulasi));
+              }
+          }
+          EOF
+
+          # 6. Java: ArtosWidgetProvider
+          cat << 'EOF' > android/app/src/main/java/com/artos/finance/ArtosWidgetProvider.java
+          package com.artos.finance;
+
+          import android.app.PendingIntent;
+          import android.appwidget.AppWidgetManager;
+          import android.appwidget.AppWidgetProvider;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.widget.RemoteViews;
+          import java.text.NumberFormat;
+          import java.util.Locale;
+
+          public class ArtosWidgetProvider extends AppWidgetProvider {
+
+              @Override
+              public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+                  perbaruiSemuaWidget(context, appWidgetManager, appWidgetIds);
+              }
+
+              public static void perbaruiSemuaWidget(Context context, AppWidgetManager mgr, int[] appWidgetIds) {
+                  SharedPreferences pref = context.getSharedPreferences("ArtosWidgetData", Context.MODE_PRIVATE);
+                  long tunai = pref.getLong("saldo_tunai", 0);
+                  long gopay = pref.getLong("saldo_gopay", 0);
+                  long mandiri = pref.getLong("saldo_mandiri", 0);
+                  long limit = pref.getLong("sisa_limit", 50000);
+
+                  NumberFormat fmt = NumberFormat.getNumberInstance(new Locale("id", "ID"));
+
+                  for (int id : appWidgetIds) {
+                      RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_artos);
+                      views.setTextViewText(R.id.tvWidgetTunai, "Rp " + fmt.format(tunai));
+                      views.setTextViewText(R.id.tvWidgetGopay, "Rp " + fmt.format(gopay));
+                      views.setTextViewText(R.id.tvWidgetMandiri, "Rp " + fmt.format(mandiri));
+                      views.setTextViewText(R.id.tvWidgetSisaLimit, "Limit: Rp " + fmt.format(limit));
+
+                      Intent intent = new Intent(context, QuickInputActivity.class);
+                      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                      PendingIntent pendingIntent = PendingIntent.getActivity(
+                          context, i        android:layout_height="44dp"
                       android:layout_weight="1"
                       android:layout_marginEnd="4dp"
                       android:text="+100 Ribu"
