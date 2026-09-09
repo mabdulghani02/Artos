@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Kode
+      - name: Checkout Kode Repositori
         uses: actions/checkout@v4
 
-      - name: Pasang Node.js
+      - name: Pasang Lingkungan Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -25,21 +25,25 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Pasang Dependensi Capacitor
+      - name: Pasang Dependensi Proyek
         run: |
           npm install
-          npx cap add android
 
-      - name: Sinkronisasi Aset Web
+      - name: Inisialisasi Platform Android
         run: |
+          npx cap add android || true
           npx cap sync android
 
-      - name: Rakit APK Android (Debug)
+      - name: Berikan Izin Eksekusi Gradle
+        run: |
+          chmod +x android/gradlew
+
+      - name: Kompilasi APK Android Debug
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
-      - name: Unggah Berkas APK
+      - name: Unggah Berkas APK Jadi
         uses: actions/upload-artifact@v4
         with:
           name: Artos-App
