@@ -787,3 +787,36 @@ function perbaruiDataUntukKWGT() {
   // atau unduh berkas kecil bernama artos_data.json ke folder Download
   console.log("Data KWGT diperbarui:", payloadKWGT);
 }
+// ==========================================
+// PANCARKAN DATA ARTOS KE SISTEM KWGT
+// ==========================================
+function sinkronkanKeKWGT() {
+  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+  const logs = bacaData('catatan_uang', []);
+  const hariIni = new Date().toISOString().split('T')[0];
+
+  let keluarHariIni = 0;
+  logs.forEach(l => {
+    if (l.waktu && l.waktu.startsWith(hariIni) && l.jenis === 'Keluar') {
+      keluarHariIni += Number(l.nominal) || 0;
+    }
+  });
+
+  const limitHarian = typeof batasHarianDinamis !== 'undefined' ? batasHarianDinamis : 50000;
+  const sisaLimit = Math.max(0, limitHarian - keluarHariIni);
+
+  if (window.KWGTBridge && window.KWGTBridge.kirimSemuaKeKWGT) {
+    window.KWGTBridge.kirimSemuaKeKWGT(
+      String(saldo.tunai || 0),
+      String(saldo.gopay || 0),
+      String(saldo.mandiri || 0),
+      String(sisaLimit)
+    );
+  }
+}
+
+// Otomatis kirim data setiap kali aplikasi Artos dibuka
+document.addEventListener('DOMContentLoaded', () => {
+  sinkronkanKeKWGT();
+});
+setInterval(sinkronkanKeKWGT, 3000);
