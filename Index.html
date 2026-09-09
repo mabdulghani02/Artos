@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Keuangan Pribadi</title>
+  <style>
+    /* Pengaturan Gaya Dasar (S-P-O-K diterapkan dalam penjelasan kode) */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      color: #333;
+      padding-bottom: 60px; /* Ruang untuk bilah navigasi bawah */
+    }
+    
+    .header {
+      background-color: #007bff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    /* Pengaturan Kartu Ringkasan */
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+
+    .progress-bar-bg {
+      background-color: #e0e0e0;
+      height: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background-color: #28a745;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    /* Pengaturan Formulir Input */
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    
+    /* Pengaturan Tombol */
+    .btn-quick {
+      display: inline-block;
+      padding: 8px 12px;
+      background: #e9ecef;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 5px;
+      margin-bottom: 10px;
+    }
+    .btn-quick:active { background: #d0d0d0; }
+    
+    .btn-primary {
+      width: 100%;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .btn-success {
+      width: 100%;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    /* Pengaturan Navigasi Tab Bawah */
+    .nav-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    }
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .nav-item.active {
+      color: #007bff;
+      font-weight: bold;
+      border-top: 3px solid #007bff;
+    }
+    
+    /* Pengaturan Perpindahan Halaman */
+    .page { display: none; }
+    .page.active { display: block; }
+    
+    .list-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header" id="appHeader">Hari Ini</div>
+
+  <!-- TAB 1: BERANDA -->
+  <div id="page-catat" class="page active container">
+    <div class="card">
+      <div>Sisa Kuota Harian (Maks Rp 50.000)</div>
+      <div id="teksSisaKuota"><b>Rp 50.000</b></div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="barKuota"></div>
+      </div>
+    </div>
+
+    <button class="btn-success" onclick="simpanInsentif()">+ Insentif Hadir (Rp 15.000)</button>
+
+    <div class="card">
+      <div class="form-group">
+        <label>Nominal Pengeluaran (Rp)</label>
+        <input type="number" id="inputNominal" placeholder="Cth: 15000">
+      </div>
+      <div>
+        <span class="btn-quick" onclick="isiCepat(15000)">15rb</span>
+        <span class="btn-quick" onclick="isiCepat(25000)">25rb</span>
+        <span class="btn-quick" onclick="isiCepat(35000)">35rb</span>
+        <span class="btn-quick" onclick="isiCepat(50000)">50rb</span>
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select id="inputKategori">
+          <option value="Rokok & Kopi">Rokok & Kopi</option>
+          <option value="Hiburan Mingguan">Hiburan Mingguan</option>
+          <option value="Pulang Sumedang">Pulang Sumedang</option>
+          <option value="Pakaian">Pakaian</option>
+          <option value="Bodycare">Bodycare</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="simpanPengeluaran()">Simpan Transaksi</button>
+    </div>
+  </div>
+
+  <!-- TAB 2: RIWAYAT -->
+  <div id="page-riwayat" class="page container">
+    <div class="card">
+      <h3>Daftar Transaksi</h3>
+      <div id="wadahRiwayat">Belum ada data.</div>
+    </div>
+  </div>
+
+  <!-- TAB 3: LAPORAN -->
+  <div id="page-laporan" class="page container">
+    <div class="card">
+      <h3>Ringkasan Bulanan</h3>
+      <div class="list-item"><span>Saldo Gaji:</span> <span>Rp 2.500.000</span></div>
+      <div class="list-item"><span>Total Insentif:</span> <span id="teksTotalInsentif">Rp 0</span></div>
+      <div class="list-item"><span>Total Pengeluaran:</span> <span id="teksTotalKeluar" style="color:red">Rp 0</span></div>
+      <div class="list-item" style="font-weight:bold;"><span>Proyeksi Tabungan:</span> <span id="teksTabungan">Rp 2.500.000</span></div>
+    </div>
+    
+    <div class="card">
+      <h3>Wawasan AI</h3>
+      <p id="teksWawasan">Sistem belum mendeteksi batas pengeluaran. Anda masih berada di jalur aman hari ini.</p>
+    </div>
+  </div>
+
+  <!-- NAVIGASI BAWAH -->
+  <div class="nav-bottom">
+    <div class="nav-item active" id="nav-catat" onclick="bukaTab('catat', 'Hari Ini')">Catat</div>
+    <div class="nav-item" id="nav-riwayat" onclick="bukaTab('riwayat', 'Riwayat')">Riwayat</div>
+    <div class="nav-item" id="nav-laporan" onclick="bukaTab('laporan', 'Laporan')">Laporan</div>
+  </div>
+
+  <script>
+    const BATAS_HARIAN = 50000;
+
+    // Fungsi ini mengatur perpindahan tampilan tab menu.
+    function bukaTab(idTab, judul) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      
+      document.getElementById('page-' + idTab).classList.add('active');
+      document.getElementById('nav-' + idTab).classList.add('active');
+      document.getElementById('appHeader').innerText = judul;
+      
+      if(idTab === 'riwayat') muatRiwayat();
+      if(idTab === 'laporan') hitungLaporan();
+    }
+
+    // Fungsi ini mengisi kolom nominal secara otomatis saat pengguna menekan tombol cepat.
+    function isiCepat(nominal) {
+      document.getElementById('inputNominal').value = nominal;
+    }
+
+    // Fungsi ini merekam data uang masuk ke dalam memori perangkat.
+    function simpanInsentif() {
+      tambahData('Masuk', 'Insentif Hadir', 15000);
+      alert('Insentif Rp 15.000 berhasil dicatat.');
+    }
+
+    // Fungsi ini merekam data uang keluar ke dalam memori perangkat.
+    function simpanPengeluaran() {
+      const nominal = parseInt(document.getElementById('inputNominal').value);
+      const kategori = document.getElementById('inputKategori').value;
+
+      if (!nominal) {
+        alert("Sistem memerlukan nilai nominal.");
+        return;
+      }
+      
+      tambahData('Keluar', kategori, nominal);
+      document.getElementById('inputNominal').value = '';
+      alert('Pengeluaran berhasil dicatat.');
+      perbaruiDasbor();
+    }
+
+    // Fungsi ini menjalankan proses penyimpanan inti ke localStorage.
+    function tambahData(jenis, kategori, nominal) {
+      const dataLama = JSON.parse(localStorage.getItem('catatan_uang') || '[]');
+      const itemBaru = {
+        jenis: jenis,
+        kategori: kategori,
+        nominal: nominal,
+        waktu: new Date().toISOString()
+      };
+      dataLama.push(itemBaru);
+      localStorage.setItem('catatan_uang', JSON.stringify(dataLama));
+    }
+
+    // Fungsi ini membaca sisa anggaran berjalan dan mengatur indikator warna.
+    function perbaruiDasbor() {
+      const data = JSON.parse(localStorage.getItem('catatan_uang') || '[]');
+      const tglHariIni = new Date().toISOString().split('T')[0];
+      
+      let pengeluaranHariIni = 0;
+      data.forEach(item => {
+        if (item.waktu.startsWith(tglHariIni) && item.jenis === 'Keluar' && item.kategori === 'Rokok & Kopi') {
+          pengeluaranHariIni += item.nominal;
+        }
+      });
+
+      const sisa = BATAS_HARIAN - pengeluaranHariIni;
+      document.getElementById('teksSisaKuota').innerHTML = `<b>Rp ${sisa.toLocaleString('id-ID')}</b>`;
+      
+      let persentase = (pengeluaranHariIni / BATAS_HARIAN) * 100;
+      if (persentase > 100) persentase = 100;
+      
+      const bar = document.getElementById('barKuota');
+      bar.style.width = persentase + '%';
+      
+      if (persentase > 90) bar.style.backgroundColor = 'red';
+      else if (persentase > 70) bar.style.backgroundColor = 'orange';
+      else bar.style.backgroundColor = '#28a745';
+
+      // Evaluasi batas memicu pesan peringatan.
+      if (pengeluaranHariIni > BATAS_HARIAN) {
+        alert("PERHATIAN: Pengeluaran harian Anda telah melewati batas Rp 50.000.");
+      }
+    }
+
+    // Fungsi ini menyajikan teks daftar transaksi pada layar riwayat.
+    function muatRiwayat() {
+      const data = JSON.parse(localStorage.getItem('catatan_uang') || '[]');
+      const wadah = document.getElementById('wadahRiwayat');
+      wadah.innerHTML = '';
+      
+      if (data.length === 0) {
+        wadah.innerText = 'Belum ada data.';
+        return;
+      }
+
+      data.slice().reverse().forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        const tanda = item.jenis === 'Masuk' ? '+' : '-';
+        const warna = item.jenis === 'Masuk' ? 'green' : 'red';
+        
+        div.innerHTML = `
+          <span>${item.kategori}</span> 
+          <span style="color:${warna}">${tanda} Rp ${item.nominal.toLocaleString('id-ID')}</span>
+        `;
+        wadah.appendChild(div);
+      });
+    }
+
+    // Fungsi ini menghitung rekapitulasi data saldo pada layar laporan.
+    function hitungLaporan() {
+      const data = JSON.parse(localStorage.getItem('catatan_uang') || '[]');
+      let totalMasuk = 0;
+      let totalKeluar = 0;
+
+      data.forEach(item => {
+        if (item.jenis === 'Masuk') totalMasuk += item.nominal;
+        if (item.jenis === 'Keluar') totalKeluar += item.nominal;
+      });
+
+      const gajiTetap = 2500000;
+      const tabungan = (gajiTetap + totalMasuk) - totalKeluar;
+
+      document.getElementById('teksTotalInsentif').innerText = `Rp ${totalMasuk.toLocaleString('id-ID')}`;
+      document.getElementById('teksTotalKeluar').innerText = `Rp ${totalKeluar.toLocaleString('id-ID')}`;
+      document.getElementById('teksTabungan').innerText = `Rp ${tabungan.toLocaleString('id-ID')}`;
+    }
+
+    // Sistem menjalankan fungsi perbarui dasbor ketika layar dimuat pertama kali.
+    window.onload = perbaruiDasbor;
+  </script>
+</body>
+  </html>
+  
