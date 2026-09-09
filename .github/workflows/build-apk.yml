@@ -32,18 +32,17 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Buat dan Suntikkan Komponen Widget Otomatis
+      - name: Integrasikan Komponen Widget Android
         run: |
           node -e '
           const fs = require("fs");
-          const path = require("path");
 
-          // 1. Buat folder tujuan
+          // 1. Buat direktori sumber daya
           fs.mkdirSync("android/app/src/main/res/layout", { recursive: true });
           fs.mkdirSync("android/app/src/main/res/xml", { recursive: true });
           fs.mkdirSync("android/app/src/main/java/com/artos/finance", { recursive: true });
 
-          // 2. Tulis layout widget_artos.xml
+          // 2. Buat berkas layout tampilan widget
           const layoutXml = `<?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
@@ -67,7 +66,7 @@ jobs:
                       android:id="@+id/tvWidgetSisaLimit"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="Sisa Limit: Rp 50.000"
+                      android:text="Limit: Rp 50.000"
                       android:textColor="#2d6a4f"
                       android:textStyle="bold"
                       android:textSize="12sp" />
@@ -107,14 +106,14 @@ jobs:
                   android:id="@+id/btnWidgetInputCepat"
                   android:layout_width="match_parent"
                   android:layout_height="38dp"
-                  android:text="+ Catat Pengeluaran"
+                  android:text="+ Catat Transaksi"
                   android:textColor="#ffffff"
                   android:background="#2d6a4f"
                   android:textSize="12sp" />
           </LinearLayout>`;
           fs.writeFileSync("android/app/src/main/res/layout/widget_artos.xml", layoutXml);
 
-          // 3. Tulis artos_widget_info.xml
+          // 3. Buat metadata widget
           const infoXml = `<?xml version="1.0" encoding="utf-8"?>
           <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
               android:minWidth="280dp"
@@ -126,8 +125,9 @@ jobs:
           </appwidget-provider>`;
           fs.writeFileSync("android/app/src/main/res/xml/artos_widget_info.xml", infoXml);
 
-          // 4. Tulis ArtosWidgetProvider.java
+          // 4. Buat kode Java Provider dengan referensi R eksplisit
           const providerJava = `package com.artos.finance;
+
           import android.app.PendingIntent;
           import android.appwidget.AppWidgetManager;
           import android.appwidget.AppWidgetProvider;
@@ -146,25 +146,27 @@ jobs:
                   String limit = pref.getString("artos_sisa_limit", "50.000");
 
                   for (int appWidgetId : appWidgetIds) {
-                      RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_artos);
-                      views.setTextViewText(R.id.tvWidgetTunai, "Tunai:\\nRp " + tunai);
-                      views.setTextViewText(R.id.tvWidgetGopay, "GoPay:\\nRp " + gopay);
-                      views.setTextViewText(R.id.tvWidgetMandiri, "Mandiri:\\nRp " + mandiri);
-                      views.setTextViewText(R.id.tvWidgetSisaLimit, "Sisa Limit: Rp " + limit);
+                      RemoteViews views = new RemoteViews(context.getPackageName(), com.artos.finance.R.layout.widget_artos);
+                      views.setTextViewText(com.artos.finance.R.id.tvWidgetTunai, "Tunai:\\nRp " + tunai);
+                      views.setTextViewText(com.artos.finance.R.id.tvWidgetGopay, "GoPay:\\nRp " + gopay);
+                      views.setTextViewText(com.artos.finance.R.id.tvWidgetMandiri, "Mandiri:\\nRp " + mandiri);
+                      views.setTextViewText(com.artos.finance.R.id.tvWidgetSisaLimit, "Limit: Rp " + limit);
 
-                      Intent intent = new Intent(context, MainActivity.class);
-                      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                      PendingIntent pendingIntent = PendingIntent.getActivity(
-                          context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                      );
-                      views.setOnClickPendingIntent(R.id.btnWidgetInputCepat, pendingIntent);
+                      Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+                      if (intent != null) {
+                          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                          PendingIntent pendingIntent = PendingIntent.getActivity(
+                              context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                          );
+                          views.setOnClickPendingIntent(com.artos.finance.R.id.btnWidgetInputCepat, pendingIntent);
+                      }
                       appWidgetManager.updateAppWidget(appWidgetId, views);
                   }
               }
           }`;
           fs.writeFileSync("android/app/src/main/java/com/artos/finance/ArtosWidgetProvider.java", providerJava);
 
-          // 5. Daftarkan receiver ke AndroidManifest.xml
+          // 5. Perbarui AndroidManifest.xml
           const manifestPath = "android/app/src/main/AndroidManifest.xml";
           let manifest = fs.readFileSync(manifestPath, "utf8");
           const receiverTag = `
