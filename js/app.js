@@ -820,3 +820,36 @@ document.addEventListener('DOMContentLoaded', () => {
   sinkronkanKeKWGT();
 });
 setInterval(sinkronkanKeKWGT, 3000);
+window.potongDariKWGT = function(nominal, sumber, kategori) {
+  const nom = Number(nominal) || 0;
+  if (nom <= 0) return;
+
+  const dompet = (sumber || 'tunai').toLowerCase();
+  const kat = kategori || 'Pengeluaran Cepat';
+
+  // 1. Kurangi saldo lokal web
+  let dataSaldo = JSON.parse(localStorage.getItem('artos_saldo')) || { tunai: 0, gopay: 0, mandiri: 0 };
+  if (dataSaldo.hasOwnProperty(dompet)) {
+    dataSaldo[dompet] = Math.max(0, (dataSaldo[dompet] || 0) - nom);
+  } else {
+    dataSaldo.tunai = Math.max(0, (dataSaldo.tunai || 0) - nom);
+  }
+  localStorage.setItem('artos_saldo', JSON.stringify(dataSaldo));
+
+  // 2. Tambahkan riwayat transaksi
+  let catatan = JSON.parse(localStorage.getItem('catatan_uang')) || [];
+  catatan.unshift({
+    id: Date.now(),
+    waktu: new Date().toISOString(),
+    jenis: 'Keluar',
+    nominal: nom,
+    kategori: kat,
+    sumber: dompet
+  });
+  localStorage.setItem('catatan_uang', JSON.stringify(catatan));
+
+  // 3. Render ulang tampilan antarmuka
+  if (typeof muatUlangTampilan === 'function') {
+    muatUlangTampilan();
+  }
+};
