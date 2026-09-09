@@ -14,12 +14,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Siapkan Lingkungan Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Siapkan Java JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: 17
@@ -39,11 +39,10 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Pasang Jembatan Penuh Dua Arah KWGT
+      - name: Tulis Modul Java KWGT dan MainActivity
         run: |
           mkdir -p android/app/src/main/java/com/artos/finance
 
-          # 1. Java: Jembatan Javascript ke KWGT dan Sebaliknya
           cat << 'EOF' > android/app/src/main/java/com/artos/finance/KWGTBridge.java
           package com.artos.finance;
 
@@ -52,20 +51,16 @@ jobs:
           import android.content.Intent;
           import android.content.SharedPreferences;
           import android.webkit.JavascriptInterface;
-          import com.getcapacitor.BridgeActivity;
 
           public class KWGTBridge extends BroadcastReceiver {
               private Context context;
-              private BridgeActivity activity;
 
               public KWGTBridge() {}
 
-              public KWGTBridge(BridgeActivity act) {
-                  this.activity = act;
-                  this.context = act.getApplicationContext();
+              public KWGTBridge(Context ctx) {
+                  this.context = ctx;
               }
 
-              // Kirim data saldo dari Artos ke KWGT
               @JavascriptInterface
               public void kirimSemuaKeKWGT(String tunai, String gopay, String mandiri, String limit) {
                   kirimVar("tunai", tunai);
@@ -90,7 +85,6 @@ jobs:
                   context.sendBroadcast(intent);
               }
 
-              // Terima perintah potong saldo langsung dari ketukan tombol KWGT
               @Override
               public void onReceive(Context ctx, Intent intent) {
                   if ("com.artos.finance.POTONG_SALDO".equals(intent.getAction())) {
@@ -108,7 +102,6 @@ jobs:
                               .putString("limit", String.valueOf(sisaLimit))
                               .apply();
 
-                          // Siarkan balik nilai baru ke KWGT seketika
                           Intent bTunai = new Intent("org.kustom.action.SEND_VAR");
                           bTunai.putExtra("org.kustom.action.EXT_NAME", "artos");
                           bTunai.putExtra("org.kustom.action.VAR_NAME", "tunai");
@@ -126,23 +119,26 @@ jobs:
           }
           EOF
 
-      - name: Daftarkan Jembatan KWGT ke Manifest dan MainActivity
-        run: |
-          # 1. Suntikkan ke AndroidManifest.xml (Sebelum tag </application>)
-          sed -i '/<\/application>/i \        <receiver android:name=".KWGTBridge" android:exported="true">\\n            <intent-filter>\\n                <action android:name="com.artos.finance.POTONG_SALDO" />\\n            </intent-filter>\\n        </receiver>' android/app/src/main/AndroidManifest.xml
+          cat << 'EOF' > android/app/src/main/java/com/artos/finance/MainActivity.java
+          package com.artos.finance;
 
-          # 2. Suntikkan kode onResume ke MainActivity.java
-          # Mendeklarasikan kode Java yang akan disuntikkan
-          # Menggunakan sed untuk memasukkan kode segera setelah deklarasi kelas
-          
-          # Baris yang dicari untuk penyuntikan
-          TARGET_LINE="public class MainActivity extends BridgeActivity {"
-          
-          # Kode Java onResume yang disiapkan (tanpa indentasi kompleks)
-          JAVA_INJECT='@Override\npublic void onResume() {\nsuper.onResume();\nthis.bridge.getWebView().addJavascriptInterface(new KWGTBridge(this), "KWGTBridge");\nthis.bridge.getWebView().evaluateJavascript("(function(){ if(window.bacaData){ var s = bacaData(\x27artos_saldo\x27, {tunai:0,gopay:0,mandiri:0}); var l = (typeof batasHarianDinamis !== \x27undefined\x27) ? batasHarianDinamis : 50000; if(window.KWGTBridge) window.KWGTBridge.kirimSemuaKeKWGT(String(s.tunai||0), String(s.gopay||0), String(s.mandiri||0), String(l)); }})();", null);\n}'
-          
-          # Menyisipkan kode Java onResume
-          sed -i "/$TARGET_LINE/a $JAVA_INJECT" android/app/src/main/java/com/artos/finance/MainActivity.java
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onResume() {
+                  super.onResume();
+                  if (this.bridge != null && this.bridge.getWebView() != null) {
+                      this.bridge.getWebView().addJavascriptInterface(new KWGTBridge(this), "KWGTBridge");
+                  }
+              }
+          }
+          EOF
+
+      - name: Daftarkan Receiver ke AndroidManifest
+        run: |
+          sed -i '/<\/application>/i \        <receiver android:name=".KWGTBridge" android:exported="true"><intent-filter><action android:name="com.artos.finance.POTONG_SALDO" /></intent-filter></receiver>' android/app/src/main/AndroidManifest.xml
 
       - name: Kompilasi APK dengan Gradle
         run: |
