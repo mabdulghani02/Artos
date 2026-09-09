@@ -82,37 +82,71 @@ jobs:
                   intent.putExtra("org.kustom.action.EXT_NAME", "artos");
                   intent.putExtra("org.kustom.action.VAR_NAME", nama);
                   intent.putExtra("org.kustom.action.VAR_VALUE", nilai);
-                  context.sendBroadcast(intent);
+                  if (context != null) {
+                      context.sendBroadcast(intent);
+                  }
               }
 
               @Override
               public void onReceive(Context ctx, Intent intent) {
                   if ("com.artos.finance.POTONG_SALDO".equals(intent.getAction())) {
-                      long potongan = intent.getLongExtra("nominal", 0);
+                      // Baca nominal baik berupa String maupun Long/Int
+                      long potongan = 0;
+                      String nomStr = intent.getStringExtra("nominal");
+                      if (nomStr != null && !nomStr.isEmpty()) {
+                          try {
+                              potongan = Long.parseLong(nomStr.trim());
+                          } catch (Exception ignored) {}
+                      }
+                      if (potongan == 0) {
+                          potongan = intent.getLongExtra("nominal", 0);
+                      }
+
+                      String sumber = intent.getStringExtra("sumber");
+                      if (sumber == null || sumber.isEmpty()) {
+                          sumber = "tunai";
+                      }
+                      sumber = sumber.trim().toLowerCase();
+
                       if (potongan > 0) {
                           SharedPreferences pref = ctx.getSharedPreferences("ArtosKWGT", Context.MODE_PRIVATE);
-                          long tunai = Long.parseLong(pref.getString("tunai", "0"));
+                          long saldoDompet = Long.parseLong(pref.getString(sumber, "0"));
                           long limit = Long.parseLong(pref.getString("limit", "50000"));
 
-                          long sisaTunai = Math.max(0, tunai - potongan);
+                          long sisaSaldo = Math.max(0, saldoDompet - potongan);
                           long sisaLimit = Math.max(0, limit - potongan);
 
                           pref.edit()
-                              .putString("tunai", String.valueOf(sisaTunai))
+                              .putString(sumber, String.valueOf(sisaSaldo))
                               .putString("limit", String.valueOf(sisaLimit))
                               .apply();
 
-                          Intent bTunai = new Intent("org.kustom.action.SEND_VAR");
-                          bTunai.putExtra("org.kustom.action.EXT_NAME", "artos");
-                          bTunai.putExtra("org.kustom.action.VAR_NAME", "tunai");
-                          bTunai.putExtra("org.kustom.action.VAR_VALUE", String.valueOf(sisaTunai));
-                          ctx.sendBroadcast(bTunai);
+                          // Pancarkan saldo dompet terbaru ke KWGT
+                          Intent bSaldo = new Intent("org.kustom.action.SEND_VAR");
+                          bSaldo.putExtra("org.kustom.action.EXT_NAME", "artos");
+                          bSaldo.putExtra("org.kustom.action.VAR_NAME", sumber);
+                          bSaldo.putExtra("org.kustom.action.VAR_VALUE", String.valueOf(sisaSaldo));
+                          ctx.sendBroadcast(bSaldo);
 
+                          // Pancarkan limit terbaru ke KWGT
                           Intent bLimit = new Intent("org.kustom.action.SEND_VAR");
                           bLimit.putExtra("org.kustom.action.EXT_NAME", "artos");
                           bLimit.putExtra("org.kustom.action.VAR_NAME", "limit");
                           bLimit.putExtra("org.kustom.action.VAR_VALUE", String.valueOf(sisaLimit));
                           ctx.sendBroadcast(bLimit);
+
+                          // Jika aplikasi sedang aktif, jalankan pemotongan pada WebView
+                          if (MainActivity.instance != null) {
+                              final long fPotongan = potongan;
+                              final String fSumber = sumber;
+                              final String fKategori = intent.getStringExtra("kategori") != null ? intent.getStringExtra("kategori") : "Widget";
+                              MainActivity.instance.runOnUiThread(new Runnable() {
+                                  @Override
+                                  public void run() {
+                                      MainActivity.instance.eksekusiPotongJS(fPotongan, fSumber, fKategori);
+                                  }
+                              });
+                          }
                       }
                   }
               }
@@ -122,15 +156,33 @@ jobs:
           cat << 'EOF' > android/app/src/main/java/com/artos/finance/MainActivity.java
           package com.artos.finance;
 
+          import android.content.Context;
+          import android.content.SharedPreferences;
           import android.os.Bundle;
           import com.getcapacitor.BridgeActivity;
 
           public class MainActivity extends BridgeActivity {
+              public static MainActivity instance;
+
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  instance = this;
+              }
+
               @Override
               public void onResume() {
                   super.onResume();
+                  instance = this;
                   if (this.bridge != null && this.bridge.getWebView() != null) {
                       this.bridge.getWebView().addJavascriptInterface(new KWGTBridge(this), "KWGTBridge");
+                  }
+              }
+
+              public void eksekusiPotongJS(long nominal, String sumber, String kategori) {
+                  if (this.bridge != null && this.bridge.getWebView() != null) {
+                      String js = String.format("if(typeof window.potongDariKWGT === 'function'){ window.potongDariKWGT(%d, '%s', '%s'); }", nominal, sumber, kategori);
+                      this.bridge.getWebView().evaluateJavascript(js, null);
                   }
               }
           }
