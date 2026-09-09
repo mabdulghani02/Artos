@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:background="#f4fbf7">
+
+    <!-- Header: Judul & Sisa Limit Harian -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ARTOS FINANSIAL"
+            android:textColor="#163022"
+            android:textStyle="bold"
+            android:textSize="13sp" />
+        <TextView
+            android:id="@+id/tvWidgetSisaLimit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sisa Limit: Rp 50.000"
+            android:textColor="#2d6a4f"
+            android:textStyle="bold"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Tampilan 3 Dompet Penyimpanan -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="12dp">
+        <TextView
+            android:id="@+id/tvWidgetTunai"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tunai:\nRp 0"
+            android:textColor="#334155"
+            android:textSize="11sp" />
+        <TextView
+            android:id="@+id/tvWidgetGopay"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="GoPay:\nRp 0"
+            android:textColor="#334155"
+            android:textSize="11sp" />
+        <TextView
+            android:id="@+id/tvWidgetMandiri"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Mandiri:\nRp 0"
+            android:textColor="#334155"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Tombol Pintasan Input Pengeluaran -->
+    <Button
+        android:id="@+id/btnWidgetInputCepat"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:text="+ Catat Pengeluaran"
+        android:textColor="#ffffff"
+        android:background="#2d6a4f"
+        android:textSize="12sp" />
+</LinearLayout>
