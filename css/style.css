@@ -430,3 +430,28 @@ body {
   align-items: center;
   gap: 6px;
 }
+
+/* TEMA GELAP MODERN ARTOS */
+body.dark-mode {
+  background-color: #0d1117 !important;
+  color: #c9d1d9 !important;
+}
+
+body.dark-mode .card,
+body.dark-mode .wadah-laporan,
+body.dark-mode .box-saldo,
+body.dark-mode nav,
+body.dark-mode header {
+  background-color: #161b22 !important;
+  color: #f0f6fc !important;
+  border-color: #30363d !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #21262d !important;
+  color: #ffffff !important;
+  border: 1px solid #30363d !important;
+}
+
