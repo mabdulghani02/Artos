@@ -665,7 +665,7 @@ if (btnKonsultasiGemini) {
     const instruksi = "Anda adalah Artos AI, konsultan keuangan pribadi. Berikan evaluasi anggaran, strategi melunasi utang jika ada, dan saran taktis belanja harian dalam 2 paragraf singkat padat:";
     
     // Model resmi dan stabil Google AI Studio
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     try {
       const response = await fetch(url, {
