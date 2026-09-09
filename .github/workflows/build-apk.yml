@@ -1,4 +1,30 @@
-      - name: Pasang Capacitor dan Rakit Komponen Widget
+name: Build Android APK (Capacitor)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Periksa Kode Sumber
+        uses: actions/checkout@v4
+
+      - name: Siapkan Lingkungan Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Siapkan Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Inisialisasi Proyek Android Capacitor
         run: |
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
@@ -6,24 +32,44 @@
           npx cap add android
           npx cap sync android
 
-          # Menyalin aset widget otomatis ke dalam proyek Android
+      - name: Pasang Komponen Widget Artos
+        run: |
           mkdir -p android/app/src/main/res/layout
           mkdir -p android/app/src/main/res/xml
           mkdir -p android/app/src/main/java/com/artos/finance
 
-          cp android-widget/widget_artos.xml android/app/src/main/res/layout/
-          cp android-widget/ArtosWidgetProvider.java android/app/src/main/java/com/artos/finance/
+          cp android-widget/widget_artos.xml android/app/src/main/res/layout/widget_artos.xml
+          cp android-widget/ArtosWidgetProvider.java android/app/src/main/java/com/artos/finance/ArtosWidgetProvider.java
 
-          # Daftarkan konfigurasi widget ke AndroidManifest
-          sed -i '/<\/application>/i <receiver android:name=".ArtosWidgetProvider" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/artos_widget_info" /></receiver>' android/app/src/main/AndroidManifest.xml
-          
-          # Buat file metadata widget
-          cat << 'EOF' > android/app/src/main/res/xml/artos_widget_info.xml
-          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-              android:minWidth="280dp"
-              android:minHeight="110dp"
-              android:updatePeriodMillis="1800000"
-              android:initialLayout="@layout/widget_artos"
-              android:resizeMode="horizontal|vertical"
-              android:widgetCategory="home_screen" />
-          EOF
+          printf '<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"\n    android:minWidth="280dp"\n    android:minHeight="110dp"\n    android:updatePeriodMillis="1800000"\n    android:initialLayout="@layout/widget_artos"\n    android:resizeMode="horizontal|vertical"\n    android:widgetCategory="home_screen">\n</appwidget-provider>\n' > android/app/src/main/res/xml/artos_widget_info.xml
+
+          python3 -c '
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path, "r") as f:
+              content = f.read()
+          receiver = """
+              <receiver android:name=".ArtosWidgetProvider" android:exported="true">
+                  <intent-filter>
+                      <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                  </intent-filter>
+                  <meta-data
+                      android:name="android.appwidget.provider"
+                      android:resource="@xml/artos_widget_info" />
+              </receiver>
+          </application>"""
+          content = content.replace("</application>", receiver)
+          with open(path, "w") as f:
+              f.write(content)
+          '
+
+      - name: Kompilasi APK dengan Gradle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Unggah Berkas APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artos-Finansial-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
