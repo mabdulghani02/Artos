@@ -39,203 +39,147 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Pasang Modul Widget dan Dialog Sembulan
+      - name: Pasang Jembatan Penuh Dua Arah KWGT
         run: |
-          mkdir -p android/app/src/main/res/layout
-          mkdir -p android/app/src/main/res/xml
-          mkdir -p android/app/src/main/res/drawable
           mkdir -p android/app/src/main/java/com/artos/finance
 
-          cat << 'EOF' > android/app/src/main/res/drawable/widget_bg.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="http://schemas.android.com/apk/res/android">
-              <solid android:color="#0f172a" />
-              <corners android:radius="20dp" />
-              <stroke android:width="1dp" android:color="#1e293b" />
-          </shape>
+          # 1. Java: Jembatan Javascript ke KWGT dan Sebaliknya
+          cat << 'EOF' > android/app/src/main/java/com/artos/finance/KWGTBridge.java
+          package com.artos.finance;
+
+          import android.content.BroadcastReceiver;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.webkit.JavascriptInterface;
+          import com.getcapacitor.BridgeActivity;
+
+          public class KWGTBridge extends BroadcastReceiver {
+              private Context context;
+              private BridgeActivity activity;
+
+              public KWGTBridge() {}
+
+              public KWGTBridge(BridgeActivity act) {
+                  this.activity = act;
+                  this.context = act.getApplicationContext();
+              }
+
+              // Kirim data saldo dari Artos ke KWGT
+              @JavascriptInterface
+              public void kirimSemuaKeKWGT(String tunai, String gopay, String mandiri, String limit) {
+                  kirimVar("tunai", tunai);
+                  kirimVar("gopay", gopay);
+                  kirimVar("mandiri", mandiri);
+                  kirimVar("limit", limit);
+
+                  SharedPreferences pref = context.getSharedPreferences("ArtosKWGT", Context.MODE_PRIVATE);
+                  pref.edit()
+                      .putString("tunai", tunai)
+                      .putString("gopay", gopay)
+                      .putString("mandiri", mandiri)
+                      .putString("limit", limit)
+                      .apply();
+              }
+
+              private void kirimVar(String nama, String nilai) {
+                  Intent intent = new Intent("org.kustom.action.SEND_VAR");
+                  intent.putExtra("org.kustom.action.EXT_NAME", "artos");
+                  intent.putExtra("org.kustom.action.VAR_NAME", nama);
+                  intent.putExtra("org.kustom.action.VAR_VALUE", nilai);
+                  context.sendBroadcast(intent);
+              }
+
+              // Terima perintah potong saldo langsung dari ketukan tombol KWGT
+              @Override
+              public void onReceive(Context ctx, Intent intent) {
+                  if ("com.artos.finance.POTONG_SALDO".equals(intent.getAction())) {
+                      long potongan = intent.getLongExtra("nominal", 0);
+                      if (potongan > 0) {
+                          SharedPreferences pref = ctx.getSharedPreferences("ArtosKWGT", Context.MODE_PRIVATE);
+                          long tunai = Long.parseLong(pref.getString("tunai", "0"));
+                          long limit = Long.parseLong(pref.getString("limit", "50000"));
+
+                          long sisaTunai = Math.max(0, tunai - potongan);
+                          long sisaLimit = Math.max(0, limit - potongan);
+
+                          pref.edit()
+                              .putString("tunai", String.valueOf(sisaTunai))
+                              .putString("limit", String.valueOf(sisaLimit))
+                              .apply();
+
+                          // Siarkan balik nilai baru ke KWGT seketika
+                          Intent bTunai = new Intent("org.kustom.action.SEND_VAR");
+                          bTunai.putExtra("org.kustom.action.EXT_NAME", "artos");
+                          bTunai.putExtra("org.kustom.action.VAR_NAME", "tunai");
+                          bTunai.putExtra("org.kustom.action.VAR_VALUE", String.valueOf(sisaTunai));
+                          ctx.sendBroadcast(bTunai);
+
+                          Intent bLimit = new Intent("org.kustom.action.SEND_VAR");
+                          bLimit.putExtra("org.kustom.action.EXT_NAME", "artos");
+                          bLimit.putExtra("org.kustom.action.VAR_NAME", "limit");
+                          bLimit.putExtra("org.kustom.action.VAR_VALUE", String.valueOf(sisaLimit));
+                          ctx.sendBroadcast(bLimit);
+                      }
+                  }
+              }
+          }
           EOF
 
-          cat << 'EOF' > android/app/src/main/res/drawable/btn_pecahan_bg.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="http://schemas.android.com/apk/res/android">
-              <solid android:color="#1e293b" />
-              <corners android:radius="10dp" />
-              <stroke android:width="1dp" android:color="#334155" />
-          </shape>
-          EOF
+          # 2. Daftarkan Receiver Siaran di AndroidManifest.xml
+          python3 -c '
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path, "r") as f:
+              content = f.read()
+          receiver = """
+                  <receiver android:name=".KWGTBridge" android:exported="true">
+                      <intent-filter>
+                          <action android:name="com.artos.finance.POTONG_SALDO" />
+                      </intent-filter>
+                  </receiver>
+              </application>"""
+          content = content.replace("</application>", receiver)
+          with open(path, "w") as f:
+              f.write(content)
+          '
 
-          cat << 'EOF' > android/app/src/main/res/layout/widget_artos.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:padding="14dp"
-              android:background="@drawable/widget_bg">
+          # 3. Suntikkan Pengait Web Interface ke MainActivity.java
+          python3 -c '
+          path = "android/app/src/main/java/com/artos/finance/MainActivity.java"
+          with open(path, "r") as f:
+              code = f.read()
+          inject = """
+              @Override
+              public void onResume() {
+                  super.onResume();
+                  this.bridge.getWebView().addJavascriptInterface(new KWGTBridge(this), "KWGTBridge");
+                  this.bridge.getWebView().evaluateJavascript(
+                      "(function(){ if(window.bacaData){" +
+                      "  var s = bacaData(\x27artos_saldo\x27, {tunai:0,gopay:0,mandiri:0});" +
+                      "  var l = (typeof batasHarianDinamis !== \x27undefined\x27) ? batasHarianDinamis : 50000;" +
+                      "  if(window.KWGTBridge) window.KWGTBridge.kirimSemuaKeKWGT(String(s.tunai||0), String(s.gopay||0), String(s.mandiri||0), String(l));" +
+                      "}})();", null
+                  );
+              }
+          """
+          code = code.replace("public class MainActivity extends BridgeActivity {", "public class MainActivity extends BridgeActivity {\n" + inject)
+          with open(path, "w") as f:
+              f.write(code)
+          '
 
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal">
-                  <TextView
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"
-                      android:text="ARTOS FINANSIAL"
-                      android:textColor="#10b981"
-                      android:textStyle="bold"
-                      android:textSize="12sp" />
-                  <TextView
-                      android:id="@+id/tvWidgetSisaLimit"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="Limit: Rp 50.000"
-                      android:textColor="#f43f5e"
-                      android:textStyle="bold"
-                      android:textSize="12sp" />
-              </LinearLayout>
+      - name: Kompilasi APK dengan Gradle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
 
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:weightSum="3"
-                  android:layout_marginTop="8dp"
-                  android:layout_marginBottom="8dp">
-
-                  <LinearLayout
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"
-                      android:orientation="vertical">
-                      <TextView
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="Tunai"
-                          android:textColor="#94a3b8"
-                          android:textSize="10sp" />
-                      <TextView
-                          android:id="@+id/tvWidgetTunai"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="Rp 0"
-                          android:textColor="#ffffff"
-                          android:textStyle="bold"
-                          android:textSize="12sp" />
-                  </LinearLayout>
-
-                  <LinearLayout
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"
-                      android:orientation="vertical">
-                      <TextView
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="GoPay"
-                          android:textColor="#94a3b8"
-                          android:textSize="10sp" />
-                      <TextView
-                          android:id="@+id/tvWidgetGopay"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="Rp 0"
-                          android:textColor="#ffffff"
-                          android:textStyle="bold"
-                          android:textSize="12sp" />
-                  </LinearLayout>
-
-                  <LinearLayout
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"
-                      android:orientation="vertical">
-                      <TextView
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="Mandiri"
-                          android:textColor="#94a3b8"
-                          android:textSize="10sp" />
-                      <TextView
-                          android:id="@+id/tvWidgetMandiri"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="Rp 0"
-                          android:textColor="#ffffff"
-                          android:textStyle="bold"
-                          android:textSize="12sp" />
-                  </LinearLayout>
-              </LinearLayout>
-
-              <Button
-                  android:id="@+id/btnBukaPopupInput"
-                  android:layout_width="match_parent"
-                  android:layout_height="36dp"
-                  android:text="⚡ Catat Pengeluaran Cepat"
-                  android:textColor="#ffffff"
-                  android:background="@drawable/btn_pecahan_bg"
-                  android:textSize="11sp" />
-          </LinearLayout>
-          EOF
-
-          cat << 'EOF' > android/app/src/main/res/xml/artos_widget_info.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-              android:minWidth="260dp"
-              android:minHeight="90dp"
-              android:updatePeriodMillis="1800000"
-              android:initialLayout="@layout/widget_artos"
-              android:resizeMode="horizontal|vertical"
-              android:widgetCategory="home_screen" />
-          EOF
-
-          cat << 'EOF' > android/app/src/main/res/layout/dialog_quick_input.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:padding="20dp"
-              android:background="@drawable/widget_bg">
-
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="Total Pengeluaran Dipilih:"
-                  android:textColor="#94a3b8"
-                  android:textSize="12sp" />
-
-              <TextView
-                  android:id="@+id/tvTotalAkumulasi"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="Rp 0"
-                  android:textColor="#38bdf8"
-                  android:textStyle="bold"
-                  android:textSize="26sp"
-                  android:layout_marginBottom="16dp" />
-
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:weightSum="3"
-                  android:layout_marginBottom="8dp">
-                  <Button
-                      android:id="@+id/btn100k"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
-                      android:layout_marginEnd="4dp"
-                      android:text="+100 Ribu"
-                      android:textColor="#ffffff"
-                      android:background="@drawable/btn_pecahan_bg"
-                      android:textSize="11sp" />
-                  <Button
-                      android:id="@+id/btn50k"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
+      - name: Unggah Artefak APK Siap Unduh
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artos-Finansial-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+              android:layout_weight="1"
                       android:layout_marginEnd="4dp"
                       android:text="+50 Ribu"
                       android:textColor="#ffffff"
