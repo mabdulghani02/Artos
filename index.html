@@ -313,6 +313,45 @@
       padding: 10px;
       margin-top: 10px;
     }
+
+    /* Modal Sheet Modern */
+    .sheet-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 23, 42, 0.6);
+      z-index: 99;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sheet-overlay.open {
+      display: flex;
+    }
+    .sheet-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      animation: slideUp 0.25s ease-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .field-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
   </style>
 </head>
 <body>
@@ -322,7 +361,7 @@
     <div class="header-title" id="appHeader">
       <i class="bi bi-wallet2"></i> <span id="headerTitleText">Hari Ini</span>
     </div>
-    <button class="btn-icon-head" id="btnBukaSaldo" title="Sesuaikan Saldo">
+    <button class="btn-icon-head" id="btnBukaSheetSaldo" title="Sesuaikan Saldo">
       <i class="bi bi-sliders"></i>
     </button>
   </div>
@@ -493,6 +532,39 @@
     </div>
   </div>
 
+  <!-- LEMBAR GESER: SESUAIKAN SEMUA SALDO SEKALIGUS -->
+  <div class="sheet-overlay" id="sheetSaldo">
+    <div class="sheet-container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+          <i class="bi bi-sliders text-primary"></i> Sesuaikan Seluruh Saldo
+        </h3>
+        <button id="btnTutupSheet" style="background:none; border:none; font-size:1.3rem; color:#64748b; cursor:pointer;">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="field-label"><i class="bi bi-cash icon-tunai"></i> Saldo Kas Tunai (Rp)</label>
+        <input type="number" id="inpSheetTunai" class="form-input-plain" style="margin-bottom:0;" placeholder="0">
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="field-label"><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay (Rp)</label>
+        <input type="number" id="inpSheetGopay" class="form-input-plain" style="margin-bottom:0;" placeholder="0">
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label class="field-label"><i class="bi bi-bank2 icon-mandiri"></i> Saldo Bank Mandiri (Rp)</label>
+        <input type="number" id="inpSheetMandiri" class="form-input-plain" style="margin-bottom:0;" placeholder="0">
+      </div>
+
+      <button class="btn-primary" id="btnSimpanSemuaSaldo">
+        <i class="bi bi-check-circle-fill"></i> Simpan Semua Perubahan
+      </button>
+    </div>
+  </div>
+
   <!-- NAVIGASI BAWAH -->
   <div class="nav-bottom">
     <div class="nav-item active" data-tab="catat" data-title="Hari Ini" data-icon="bi-wallet2">
@@ -520,7 +592,6 @@
     let kategoriTerpilih = 'Rokok & Kopi';
     let tipeHutangTerpilih = 'piutang';
 
-    // Utilitas Penyimpanan Aman
     function bacaData(kunci, bawaan) {
       try {
         const item = localStorage.getItem(kunci);
@@ -538,7 +609,6 @@
       }
     }
 
-    // Pembersihan & Inisialisasi Saldo
     function siapkanSaldo() {
       let saldo = bacaData('artos_saldo', null);
       if (!saldo || typeof saldo !== 'object') {
@@ -555,7 +625,41 @@
       document.getElementById('saldo-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
     }
 
-    // Pindah Tab Halaman
+    // Alur Lembar Saldo Terpadu
+    const sheetSaldo = document.getElementById('sheetSaldo');
+
+    document.getElementById('btnBukaSheetSaldo').addEventListener('click', function() {
+      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+      document.getElementById('inpSheetTunai').value = saldo.tunai || 0;
+      document.getElementById('inpSheetGopay').value = saldo.gopay || 0;
+      document.getElementById('inpSheetMandiri').value = saldo.mandiri || 0;
+      sheetSaldo.classList.add('open');
+    });
+
+    document.getElementById('btnTutupSheet').addEventListener('click', function() {
+      sheetSaldo.classList.remove('open');
+    });
+
+    sheetSaldo.addEventListener('click', function(e) {
+      if (e.target === sheetSaldo) {
+        sheetSaldo.classList.remove('open');
+      }
+    });
+
+    document.getElementById('btnSimpanSemuaSaldo').addEventListener('click', function() {
+      const saldoBaru = {
+        tunai: parseInt(document.getElementById('inpSheetTunai').value) || 0,
+        gopay: parseInt(document.getElementById('inpSheetGopay').value) || 0,
+        mandiri: parseInt(document.getElementById('inpSheetMandiri').value) || 0
+      };
+
+      tulisData('artos_saldo', saldoBaru);
+      sheetSaldo.classList.remove('open');
+      renderTampilanSaldo();
+      renderLaporan();
+      alert('Semua saldo berhasil diselaraskan sekaligus.');
+    });
+
     function pasangNavigasi() {
       document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
@@ -579,7 +683,6 @@
       });
     }
 
-    // Pilihan Dompet Catat
     function pasangPilihanDompet() {
       document.querySelectorAll('#group-dompet .wallet-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -606,7 +709,6 @@
       });
     }
 
-    // Pilihan Kategori Grid
     function pasangPilihanKategori() {
       document.querySelectorAll('#group-kategori .cat-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -617,7 +719,6 @@
       });
     }
 
-    // Pilihan Cepat Nominal
     function pasangQuickNominal() {
       document.querySelectorAll('.btn-quick').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -626,7 +727,6 @@
       });
     }
 
-    // Simpan Insentif
     document.getElementById('btnInsentif').addEventListener('click', function() {
       const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
       saldo.tunai = (saldo.tunai || 0) + 15000;
@@ -637,10 +737,9 @@
       tulisData('catatan_uang', logs);
 
       renderTampilanSaldo();
-      alert('Insentif Rp 15.000 berhasil ditambahkan ke saldo Tunai.');
+      alert('Insentif Rp 15.000 berhasil dicatat ke saldo Tunai.');
     });
 
-    // Simpan Pengeluaran
     document.getElementById('btnSimpanPengeluaran').addEventListener('click', function() {
       const inp = document.getElementById('inputNominal');
       const nom = parseInt(inp.value);
@@ -662,7 +761,6 @@
       alert('Pengeluaran berhasil dicatat.');
     });
 
-    // Indikator Kuota Harian
     function renderDasbor() {
       const logs = bacaData('catatan_uang', []);
       const hariIni = new Date().toISOString().split('T')[0];
@@ -687,27 +785,6 @@
       else bar.style.backgroundColor = '#10b981';
     }
 
-    // Modal Saldo Cepat via Prompt (Bebas Galat Blokir Layar)
-    document.getElementById('btnBukaSaldo').addEventListener('click', function() {
-      const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
-      const tBaru = prompt('Masukkan Saldo Tunai:', saldo.tunai || 0);
-      if (tBaru === null) return;
-      const gBaru = prompt('Masukkan Saldo GoPay:', saldo.gopay || 0);
-      if (gBaru === null) return;
-      const mBaru = prompt('Masukkan Saldo Mandiri:', saldo.mandiri || 0);
-      if (mBaru === null) return;
-
-      saldo.tunai = parseInt(tBaru) || 0;
-      saldo.gopay = parseInt(gBaru) || 0;
-      saldo.mandiri = parseInt(mBaru) || 0;
-
-      tulisData('artos_saldo', saldo);
-      renderTampilanSaldo();
-      renderLaporan();
-      alert('Saldo berhasil diperbarui.');
-    });
-
-    // Simpan Pinjaman
     document.getElementById('btnSimpanHutang').addEventListener('click', function() {
       const nama = document.getElementById('namaOrang').value.trim();
       const nom = parseInt(document.getElementById('nominalHutang').value);
@@ -739,7 +816,6 @@
       alert('Catatan pinjaman berhasil disimpan.');
     });
 
-    // Render Daftar Hutang
     function renderHutang() {
       const hutangList = bacaData('artos_hutang', []);
       const wadah = document.getElementById('wadahHutang');
@@ -809,7 +885,6 @@
       alert('Pinjaman berhasil dilunasi.');
     }
 
-    // Render Riwayat Mutasi
     function renderRiwayat() {
       const logs = bacaData('catatan_uang', []);
       const wadah = document.getElementById('wadahRiwayat');
@@ -837,7 +912,6 @@
       });
     }
 
-    // Pos Tabungan Baru
     document.getElementById('btnBukaTabungan').addEventListener('click', function() {
       const nama = prompt('Nama Pos Tabungan (Cth: Mudik / Darurat):');
       if (!nama) return;
@@ -912,7 +986,6 @@
       document.getElementById('rep-hutang').innerText = 'Rp ' + Number(hutang).toLocaleString('id-ID');
     }
 
-    // Inisialisasi Penuh saat DOM Siap
     window.addEventListener('DOMContentLoaded', function() {
       siapkanSaldo();
       pasangNavigasi();
