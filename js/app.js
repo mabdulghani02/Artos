@@ -717,3 +717,40 @@ window.addEventListener('DOMContentLoaded', function() {
   pasangKeypad();
   renderDasbor();
 });
+
+// ==========================================
+// SINKRONISASI OTOMATIS DATA KE WIDGET ANDROID
+// ==========================================
+function kirimDataKeWidgetAndroid() {
+  const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
+  const logs = bacaData('catatan_uang', []);
+  const hariIni = new Date().toISOString().split('T')[0];
+
+  let keluarHariIni = 0;
+  logs.forEach(l => {
+    if (l.waktu && l.waktu.startsWith(hariIni) && l.jenis === 'Keluar') {
+      keluarHariIni += Number(l.nominal) || 0;
+    }
+  });
+
+  const limitHarian = typeof batasHarianDinamis !== 'undefined' ? batasHarianDinamis : 50000;
+  const sisaLimit = Math.max(0, limitHarian - keluarHariIni);
+
+  const payload = {
+    tunai: Number(saldo.tunai) || 0,
+    gopay: Number(saldo.gopay) || 0,
+    mandiri: Number(saldo.mandiri) || 0,
+    limit: sisaLimit
+  };
+
+  // Kirim data ke SharedPreferences Android melalui jembatan Capacitor / AndroidInterface
+  if (window.AndroidBridge && window.AndroidBridge.perbaruiDataWidget) {
+    window.AndroidBridge.perbaruiDataWidget(JSON.stringify(payload));
+  }
+}
+
+// Jalankan sinkronisasi setiap kali aplikasi terbuka atau data berubah
+window.addEventListener('DOMContentLoaded', () => {
+  kirimDataKeWidgetAndroid();
+});
+
