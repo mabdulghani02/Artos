@@ -1,0 +1,14 @@
+{
+  "name": "artos",
+  "version": "1.0.0",
+  "description": "Aplikasi Keuangan Pribadi Artos",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No compile step required'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  }
+}
