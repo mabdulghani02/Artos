@@ -39,105 +39,377 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Pasang Komponen Widget Android
+      - name: Pasang Modul Widget dan Sembulan Lembaran Uang
         run: |
           node -e '
           const fs = require("fs");
 
-          // 1. Buat folder tata letak dan konfigurasi xml
           fs.mkdirSync("android/app/src/main/res/layout", { recursive: true });
           fs.mkdirSync("android/app/src/main/res/xml", { recursive: true });
+          fs.mkdirSync("android/app/src/main/res/drawable", { recursive: true });
+          fs.mkdirSync("android/app/src/main/res/values", { recursive: true });
+          fs.mkdirSync("android/app/src/main/java/com/artos/finance", { recursive: true });
 
-          // 2. Buat berkas desain tata letak widget
-          const layoutXml = `<?xml version="1.0" encoding="utf-8"?>
+          // 1. Desain Latar Belakang Widget dan Tombol
+          fs.writeFileSync("android/app/src/main/res/drawable/widget_bg.xml", `<?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="#0f172a" />
+              <corners android:radius="20dp" />
+              <stroke android:width="1dp" android:color="#1e293b" />
+          </shape>`);
+
+          fs.writeFileSync("android/app/src/main/res/drawable/btn_pecahan_bg.xml", `<?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="#1e293b" />
+              <corners android:radius="10dp" />
+              <stroke android:width="1dp" android:color="#334155" />
+          </shape>`);
+
+          // 2. Tata Letak Widget yang Fleksibel (Resizeable)
+          const widgetLayout = `<?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content"
+              android:layout_height="match_parent"
               android:orientation="vertical"
               android:padding="14dp"
-              android:background="#f4fbf7">
+              android:background="@drawable/widget_bg">
 
               <LinearLayout
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:orientation="horizontal">
+                  android:orientation="horizontal"
+                  android:gravity="center_vertical">
                   <TextView
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:layout_weight="1"
                       android:text="ARTOS FINANSIAL"
-                      android:textColor="#163022"
+                      android:textColor="#10b981"
                       android:textStyle="bold"
-                      android:textSize="13sp" />
+                      android:textSize="12sp" />
                   <TextView
                       android:id="@+id/tvWidgetSisaLimit"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:text="Limit: Rp 50.000"
-                      android:textColor="#2d6a4f"
+                      android:textColor="#f43f5e"
                       android:textStyle="bold"
                       android:textSize="12sp" />
               </LinearLayout>
 
               <LinearLayout
                   android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
+                  android:layout_height="0dp"
+                  android:layout_weight="1"
                   android:orientation="horizontal"
-                  android:layout_marginTop="10dp"
-                  android:layout_marginBottom="12dp">
-                  <TextView
-                      android:id="@+id/tvWidgetTunai"
+                  android:gravity="center_vertical"
+                  android:weightSum="3"
+                  android:layout_marginTop="8dp"
+                  android:layout_marginBottom="8dp">
+
+                  <LinearLayout
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:layout_weight="1"
-                      android:text="Tunai:\\nRp 0"
-                      android:textColor="#334155"
-                      android:textSize="11sp" />
-                  <TextView
-                      android:id="@+id/tvWidgetGopay"
+                      android:orientation="vertical">
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Tunai"
+                          android:textColor="#94a3b8"
+                          android:textSize="10sp" />
+                      <TextView
+                          android:id="@+id/tvWidgetTunai"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Rp 0"
+                          android:textColor="#ffffff"
+                          android:textStyle="bold"
+                          android:textSize="12sp" />
+                  </LinearLayout>
+
+                  <LinearLayout
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:layout_weight="1"
-                      android:text="GoPay:\\nRp 0"
-                      android:textColor="#334155"
-                      android:textSize="11sp" />
-                  <TextView
-                      android:id="@+id/tvWidgetMandiri"
+                      android:orientation="vertical">
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="GoPay"
+                          android:textColor="#94a3b8"
+                          android:textSize="10sp" />
+                      <TextView
+                          android:id="@+id/tvWidgetGopay"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Rp 0"
+                          android:textColor="#ffffff"
+                          android:textStyle="bold"
+                          android:textSize="12sp" />
+                  </LinearLayout>
+
+                  <LinearLayout
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:layout_weight="1"
-                      android:text="Mandiri:\\nRp 0"
-                      android:textColor="#334155"
-                      android:textSize="11sp" />
+                      android:orientation="vertical">
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Mandiri"
+                          android:textColor="#94a3b8"
+                          android:textSize="10sp" />
+                      <TextView
+                          android:id="@+id/tvWidgetMandiri"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Rp 0"
+                          android:textColor="#ffffff"
+                          android:textStyle="bold"
+                          android:textSize="12sp" />
+                  </LinearLayout>
               </LinearLayout>
 
               <Button
-                  android:id="@+id/btnWidgetInputCepat"
+                  android:id="@+id/btnBukaPopupInput"
                   android:layout_width="match_parent"
-                  android:layout_height="38dp"
-                  android:text="+ Catat Transaksi"
+                  android:layout_height="36dp"
+                  android:text="⚡ Catat Pengeluaran Cepat"
                   android:textColor="#ffffff"
-                  android:background="#2d6a4f"
-                  android:textSize="12sp" />
+                  android:background="@drawable/btn_pecahan_bg"
+                  android:textSize="11sp" />
           </LinearLayout>`;
-          fs.writeFileSync("android/app/src/main/res/layout/widget_artos.xml", layoutXml);
+          fs.writeFileSync("android/app/src/main/res/layout/widget_artos.xml", widgetLayout);
 
-          // 3. Buat berkas metadata widget
-          const infoXml = `<?xml version="1.0" encoding="utf-8"?>
+          // 3. Metadata Widget (Dukungan Ukuran Bebas / Resizeable)
+          fs.writeFileSync("android/app/src/main/res/xml/artos_widget_info.xml", `<?xml version="1.0" encoding="utf-8"?>
           <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-              android:minWidth="280dp"
-              android:minHeight="110dp"
+              android:minWidth="260dp"
+              android:minHeight="90dp"
+              android:targetCellWidth="3"
+              android:targetCellHeight="2"
               android:updatePeriodMillis="1800000"
               android:initialLayout="@layout/widget_artos"
               android:resizeMode="horizontal|vertical"
-              android:widgetCategory="home_screen">
-          </appwidget-provider>`;
-          fs.writeFileSync("android/app/src/main/res/xml/artos_widget_info.xml", infoXml);
+              android:widgetFeatures="reconfigurable"
+              android:widgetCategory="home_screen" />`);
 
-          // 4. Buat berkas kelas Java Provider
-          const javaDir = "android/app/src/main/java/com/artos/finance";
-          fs.mkdirSync(javaDir, { recursive: true });
+          // 4. Tata Letak Dialog Sembulan Uang (Popup Rupiah)
+          const popupLayout = `<?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="20dp"
+              android:background="@drawable/widget_bg">
 
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="Total Pengeluaran Dipilih:"
+                  android:textColor="#94a3b8"
+                  android:textSize="12sp" />
+
+              <TextView
+                  android:id="@+id/tvTotalAkumulasi"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="Rp 0"
+                  android:textColor="#38bdf8"
+                  android:textStyle="bold"
+                  android:textSize="26sp"
+                  android:layout_marginBottom="16dp" />
+
+              <!-- Baris Pecahan 100k, 50k, 20k -->
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:weightSum="3"
+                  android:layout_marginBottom="8dp">
+                  <Button
+                      android:id="@+id/btn100k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="4dp"
+                      android:text="+100 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="11sp" />
+                  <Button
+                      android:id="@+id/btn50k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="4dp"
+                      android:text="+50 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="11sp" />
+                  <Button
+                      android:id="@+id/btn20k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:text="+20 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="11sp" />
+              </LinearLayout>
+
+              <!-- Baris Pecahan 10k, 5k, 2k, 1k -->
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:weightSum="4"
+                  android:layout_marginBottom="16dp">
+                  <Button
+                      android:id="@+id/btn10k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="3dp"
+                      android:text="+10 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+                  <Button
+                      android:id="@+id/btn5k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="3dp"
+                      android:text="+5 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+                  <Button
+                      android:id="@+id/btn2k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="3dp"
+                      android:text="+2 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+                  <Button
+                      android:id="@+id/btn1k"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:text="+1 Ribu"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="10sp" />
+              </LinearLayout>
+
+              <!-- Tombol Reset & Simpan -->
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+                  <Button
+                      android:id="@+id/btnResetHitungan"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="8dp"
+                      android:text="Ulangi"
+                      android:textColor="#ef4444"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textSize="12sp" />
+                  <Button
+                      android:id="@+id/btnKonfirmasiPotong"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="2"
+                      android:text="Simpan Pengeluaran"
+                      android:textColor="#ffffff"
+                      android:background="@drawable/btn_pecahan_bg"
+                      android:textStyle="bold"
+                      android:textSize="12sp" />
+              </LinearLayout>
+          </LinearLayout>`;
+          fs.writeFileSync("android/app/src/main/res/layout/dialog_quick_input.xml", popupLayout);
+
+          // 5. Java: QuickInputActivity (Pengendali Sembulan dan Akumulasi Nominal)
+          const activityJava = `package com.artos.finance;
+
+          import android.app.Activity;
+          import android.appwidget.AppWidgetManager;
+          import android.content.ComponentName;
+          import android.content.Context;
+          import android.content.SharedPreferences;
+          import android.os.Bundle;
+          import android.widget.Button;
+          import android.widget.TextView;
+          import java.text.NumberFormat;
+          import java.util.Locale;
+
+          public class QuickInputActivity extends Activity {
+              private long totalAkumulasi = 0;
+              private TextView tvTotal;
+              private NumberFormat fmt;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.layout.dialog_quick_input);
+
+                  fmt = NumberFormat.getNumberInstance(new Locale("id", "ID"));
+                  tvTotal = findViewById(R.id.tvTotalAkumulasi);
+
+                  findViewById(R.id.btn100k).setOnClickListener(v -> tambahNominal(100000));
+                  findViewById(R.id.btn50k).setOnClickListener(v -> tambahNominal(50000));
+                  findViewById(R.id.btn20k).setOnClickListener(v -> tambahNominal(20000));
+                  findViewById(R.id.btn10k).setOnClickListener(v -> tambahNominal(10000));
+                  findViewById(R.id.btn5k).setOnClickListener(v -> tambahNominal(5000));
+                  findViewById(R.id.btn2k).setOnClickListener(v -> tambahNominal(2000));
+                  findViewById(R.id.btn1k).setOnClickListener(v -> tambahNominal(1000));
+
+                  findViewById(R.id.btnResetHitungan).setOnClickListener(v -> {
+                      totalAkumulasi = 0;
+                      perbaruiTampilan();
+                  });
+
+                  findViewById(R.id.btnKonfirmasiPotong).setOnClickListener(v -> {
+                      if (totalAkumulasi > 0) {
+                          SharedPreferences pref = getSharedPreferences("ArtosWidgetData", Context.MODE_PRIVATE);
+                          long tunai = pref.getLong("saldo_tunai", 0);
+                          long limit = pref.getLong("sisa_limit", 50000);
+
+                          pref.edit()
+                              .putLong("saldo_tunai", Math.max(0, tunai - totalAkumulasi))
+                              .putLong("sisa_limit", Math.max(0, limit - totalAkumulasi))
+                              .putBoolean("ada_transaksi_baru", true)
+                              .putLong("nominal_terakhir", totalAkumulasi)
+                              .apply();
+
+                          AppWidgetManager mgr = AppWidgetManager.getInstance(this);
+                          ComponentName cn = new ComponentName(this, ArtosWidgetProvider.class);
+                          int[] ids = mgr.getAppWidgetIds(cn);
+                          ArtosWidgetProvider.perbaruiSemuaWidget(this, mgr, ids);
+                      }
+                      finish();
+                  });
+              }
+
+              private void tambahNominal(long nilai) {
+                  totalAkumulasi += nilai;
+                  perbaruiTampilan();
+              }
+
+              private void perbaruiTampilan() {
+                  tvTotal.setText("Rp " + fmt.format(totalAkumulasi));
+              }
+          }`;
+          fs.writeFileSync("android/app/src/main/java/com/artos/finance/QuickInputActivity.java", activityJava);
+
+          // 6. Java: ArtosWidgetProvider
           const providerJava = `package com.artos.finance;
 
           import android.app.PendingIntent;
@@ -147,62 +419,19 @@ jobs:
           import android.content.Intent;
           import android.content.SharedPreferences;
           import android.widget.RemoteViews;
+          import java.text.NumberFormat;
+          import java.util.Locale;
 
           public class ArtosWidgetProvider extends AppWidgetProvider {
+
               @Override
               public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-                  SharedPreferences pref = context.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
-                  String tunai = pref.getString("artos_saldo_tunai", "0");
-                  String gopay = pref.getString("artos_saldo_gopay", "0");
-                  String mandiri = pref.getString("artos_saldo_mandiri", "0");
-                  String limit = pref.getString("artos_sisa_limit", "50.000");
-
-                  for (int appWidgetId : appWidgetIds) {
-                      RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_artos);
-                      views.setTextViewText(R.id.tvWidgetTunai, "Tunai:\\nRp " + tunai);
-                      views.setTextViewText(R.id.tvWidgetGopay, "GoPay:\\nRp " + gopay);
-                      views.setTextViewText(R.id.tvWidgetMandiri, "Mandiri:\\nRp " + mandiri);
-                      views.setTextViewText(R.id.tvWidgetSisaLimit, "Limit: Rp " + limit);
-
-                      Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-                      if (intent != null) {
-                          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                          PendingIntent pendingIntent = PendingIntent.getActivity(
-                              context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                          );
-                          views.setOnClickPendingIntent(R.id.btnWidgetInputCepat, pendingIntent);
-                      }
-                      appWidgetManager.updateAppWidget(appWidgetId, views);
-                  }
+                  perbaruiSemuaWidget(context, appWidgetManager, appWidgetIds);
               }
-          }`;
-          fs.writeFileSync(javaDir + "/ArtosWidgetProvider.java", providerJava);
 
-          // 5. Daftarkan receiver ke dalam AndroidManifest.xml
-          const manifestPath = "android/app/src/main/AndroidManifest.xml";
-          let manifest = fs.readFileSync(manifestPath, "utf8");
-          const receiverTag = `
-                  <receiver android:name=".ArtosWidgetProvider" android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                      </intent-filter>
-                      <meta-data
-                          android:name="android.appwidget.provider"
-                          android:resource="@xml/artos_widget_info" />
-                  </receiver>
-              </application>`;
-          manifest = manifest.replace("</application>", receiverTag);
-          fs.writeFileSync(manifestPath, manifest);
-          '
-
-      - name: Kompilasi APK dengan Gradle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Unggah Artefak APK Siap Unduh
-        uses: actions/upload-artifact@v4
-        with:
-          name: Artos-Finansial-Debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+              public static void perbaruiSemuaWidget(Context context, AppWidgetManager mgr, int[] appWidgetIds) {
+                  SharedPreferences pref = context.getSharedPreferences("ArtosWidgetData", Context.MODE_PRIVATE);
+                  long tunai = pref.getLong("saldo_tunai", 0);
+                  long gopay = pref.getLong("saldo_gopay", 0);
+                  long mandiri = pref.getLong("saldo_mandiri", 0);
+          
