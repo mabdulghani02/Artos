@@ -19,8 +19,10 @@
     </button>
   </div>
 
-  <!-- TAB 1: CATAT -->
+  <!-- TAB 1: CATAT (MODERN KEYPAD) -->
   <div id="page-catat" class="page active container">
+    
+    <!-- KARTU SALDO TIGA DOMPET -->
     <div class="wallet-scroll">
       <div class="wallet-card">
         <div class="wallet-icon icon-tunai"><i class="bi bi-cash"></i> Tunai</div>
@@ -36,12 +38,13 @@
       </div>
     </div>
 
+    <!-- SISA KUOTA HARIAN -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size: 0.85rem; color:#526b5d;">Batas Harian (Disesuaikan Sistem)</span>
+        <span style="font-size: 0.85rem; color:#526b5d;">Batas Harian Fleksibel</span>
         <span id="badgeBatas" style="font-size: 0.75rem; color:#799484;"><i class="bi bi-shield-check"></i> Maks: Rp 50.000</span>
       </div>
-      <div id="teksSisaKuota" style="font-size: 1.4rem; margin-top:4px; color:#172d21;"><b>Rp 50.000</b></div>
+      <div id="teksSisaKuota" style="font-size: 1.4rem; margin-top:4px; color:#1a432f;"><b>Rp 50.000</b></div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="barKuota"></div>
       </div>
@@ -54,77 +57,69 @@
       <i class="bi bi-clock-history"></i> Hadir Tepat Waktu (+15rb ke Tunai)
     </button>
 
-    <div class="card">
-      <span style="font-size:0.85rem; font-weight:600; color:#526b5d; margin-bottom:8px; display:block;">Pilih Dompet</span>
-      <div class="wallet-select-group" id="group-dompet">
-        <div class="wallet-btn active" data-val="tunai">
-          <i class="bi bi-cash icon-tunai"></i> Tunai
-        </div>
-        <div class="wallet-btn" data-val="gopay">
-          <i class="bi bi-circle-fill icon-gopay"></i> GoPay
-        </div>
-        <div class="wallet-btn" data-val="mandiri">
-          <i class="bi bi-bank2 icon-mandiri"></i> Mandiri
-        </div>
+    <!-- BLOK PENCATATAN TRANSAKSI (KEYPAD FINTECH) -->
+    <div class="fintech-card">
+      
+      <!-- PILIHAN DOMPET PIL -->
+      <div class="wallet-pills" id="group-dompet">
+        <div class="wallet-pill active" data-val="tunai"><i class="bi bi-cash"></i> Tunai</div>
+        <div class="wallet-pill" data-val="gopay"><i class="bi bi-circle-fill"></i> GoPay</div>
+        <div class="wallet-pill" data-val="mandiri"><i class="bi bi-bank2"></i> Mandiri</div>
       </div>
 
-      <div class="input-wrapper">
-        <i class="bi bi-tag"></i>
-        <input type="number" id="inputNominal" placeholder="Nominal (Rp)">
+      <!-- DISPLAY NOMINAL INTERAKTIF -->
+      <div class="display-nominal-box">
+        <div class="display-label">Nominal Pengeluaran</div>
+        <div class="display-nominal-val" id="displayNominal">Rp 0</div>
+        <button class="btn-backspace" id="btnHapusDigit" title="Hapus Angka">
+          <i class="bi bi-backspace"></i>
+        </button>
       </div>
 
-      <div class="quick-nominal">
-        <div class="btn-quick" data-nom="15000">15k</div>
-        <div class="btn-quick" data-nom="25000">25k</div>
-        <div class="btn-quick" data-nom="35000">35k</div>
-        <div class="btn-quick" data-nom="50000">50k</div>
+      <!-- KATEGORI KAPSUL GESER -->
+      <div class="category-scroller" id="group-kategori">
+        <div class="chip-kat active" data-kat="Rokok & Kopi"><i class="bi bi-cup-hot"></i> Rokok/Kopi</div>
+        <div class="chip-kat" data-kat="Hiburan"><i class="bi bi-controller"></i> Hiburan</div>
+        <div class="chip-kat" data-kat="Pulang Sumedang"><i class="bi bi-fuel-pump"></i> Pulang Sumedang</div>
+        <div class="chip-kat" data-kat="Pakaian"><i class="bi bi-bag"></i> Pakaian</div>
+        <div class="chip-kat" data-kat="Bodycare"><i class="bi bi-heart-pulse"></i> Bodycare</div>
+        <div class="chip-kat" data-kat="Lainnya"><i class="bi bi-grid"></i> Lainnya</div>
       </div>
 
-      <div class="category-grid" id="group-kategori">
-        <div class="cat-btn active" data-kat="Rokok & Kopi">
-          <i class="bi bi-cup-hot"></i>
-          <span>Rokok/Kopi</span>
-        </div>
-        <div class="cat-btn" data-kat="Hiburan">
-          <i class="bi bi-controller"></i>
-          <span>Hiburan</span>
-        </div>
-        <div class="cat-btn" data-kat="Pulang Sumedang">
-          <i class="bi bi-fuel-pump"></i>
-          <span>Sumedang</span>
-        </div>
-        <div class="cat-btn" data-kat="Pakaian">
-          <i class="bi bi-bag"></i>
-          <span>Pakaian</span>
-        </div>
-        <div class="cat-btn" data-kat="Bodycare">
-          <i class="bi bi-heart-pulse"></i>
-          <span>Bodycare</span>
-        </div>
-        <div class="cat-btn" data-kat="Lainnya">
-          <i class="bi bi-grid"></i>
-          <span>Lainnya</span>
-        </div>
+      <!-- NUMPAD SENTUH RESPONSIF -->
+      <div class="numpad-grid">
+        <button class="btn-num" data-num="1">1</button>
+        <button class="btn-num" data-num="2">2</button>
+        <button class="btn-num" data-num="3">3</button>
+        
+        <button class="btn-num" data-num="4">4</button>
+        <button class="btn-num" data-num="5">5</button>
+        <button class="btn-num" data-num="6">6</button>
+        
+        <button class="btn-num" data-num="7">7</button>
+        <button class="btn-num" data-num="8">8</button>
+        <button class="btn-num" data-num="9">9</button>
+        
+        <button class="btn-quick-tag" data-quick="15000">+15k</button>
+        <button class="btn-num" data-num="0">0</button>
+        <button class="btn-num" data-num="000">000</button>
       </div>
 
       <button class="btn-primary" id="btnSimpanPengeluaran">
-        <i class="bi bi-check-circle"></i> Simpan Transaksi
+        <i class="bi bi-check2-circle"></i> Simpan Transaksi
       </button>
     </div>
+
   </div>
 
   <!-- TAB 2: PINJAMAN -->
   <div id="page-hutang" class="page container">
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-plus-circle"></i> Catat Utang & Piutang</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#163022;"><i class="bi bi-plus-circle"></i> Catat Utang & Piutang</h3>
       
-      <div class="wallet-select-group" id="group-tipe-ht">
-        <div class="wallet-btn active" id="btn-tipe-piutang" data-tipe="piutang">
-          <i class="bi bi-arrow-up-right-square"></i> Piutang
-        </div>
-        <div class="wallet-btn" id="btn-tipe-hutang" data-tipe="hutang">
-          <i class="bi bi-arrow-down-left-square"></i> Utang (Kewajiban)
-        </div>
+      <div class="wallet-pills" id="group-tipe-ht" style="margin-bottom:12px;">
+        <div class="wallet-pill active" id="btn-tipe-piutang" data-tipe="piutang">Piutang (Saya Pinjamkan)</div>
+        <div class="wallet-pill" id="btn-tipe-hutang" data-tipe="hutang">Utang (Saya Meminjam)</div>
       </div>
 
       <input type="text" id="namaOrang" class="form-input-plain" placeholder="Nama Rekan / Pihak">
@@ -134,19 +129,19 @@
       <input type="date" id="tglJatuhTempo" class="form-input-plain">
 
       <span style="font-size:0.8rem; color:#526b5d; display:block; margin-bottom:6px;">Gunakan Saldo:</span>
-      <div class="wallet-select-group" id="group-dompet-ht">
-        <div class="wallet-btn active" data-val="tunai">Tunai</div>
-        <div class="wallet-btn" data-val="gopay">GoPay</div>
-        <div class="wallet-btn" data-val="mandiri">Mandiri</div>
+      <div class="wallet-pills" id="group-dompet-ht" style="margin-bottom:12px;">
+        <div class="wallet-pill active" data-val="tunai">Tunai</div>
+        <div class="wallet-pill" data-val="gopay">GoPay</div>
+        <div class="wallet-pill" data-val="mandiri">Mandiri</div>
       </div>
 
       <button class="btn-primary" id="btnSimpanHutang">
-        <i class="bi bi-save"></i> Simpan Transaksi
+        <i class="bi bi-save"></i> Simpan Transaksi Pinjaman
       </button>
     </div>
 
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-list-task"></i> Daftar Aktif</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#163022;"><i class="bi bi-list-task"></i> Daftar Aktif</h3>
       <div id="wadahHutang">Belum ada catatan.</div>
     </div>
   </div>
@@ -154,14 +149,14 @@
   <!-- TAB 3: RIWAYAT -->
   <div id="page-riwayat" class="page container">
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-journal-text"></i> Transaksi Terkini</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#163022;"><i class="bi bi-journal-text"></i> Transaksi Terkini</h3>
       <div id="wadahRiwayat">Belum ada mutasi.</div>
     </div>
   </div>
 
   <!-- TAB 4: LAPORAN -->
   <div id="page-laporan" class="page container">
-    <div class="card" style="background: linear-gradient(135deg, #163a2a, #245e43); color: white;">
+    <div class="card" style="background: linear-gradient(135deg, #1a432f, #2d6a4f); color: white;">
       <div style="font-size: 0.85rem; opacity: 0.9;">Uang Bebas Pakai</div>
       <div id="rep-uang-bebas" style="font-size: 1.7rem; font-weight: bold; margin: 4px 0 10px 0;">Rp 0</div>
       <div style="font-size: 0.8rem; opacity: 0.85; display: flex; justify-content: space-between;">
@@ -172,7 +167,7 @@
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; font-size:1.05rem; color:#172d21;"><i class="bi bi-stars" style="color:#0087a3;"></i> Konsultan Finansial AI</h3>
+        <h3 style="margin:0; font-size:1.05rem; color:#163022;"><i class="bi bi-stars" style="color:#0087a3;"></i> Konsultan Finansial AI</h3>
       </div>
       <button class="btn-ai" id="btnKonsultasiGemini">
         <i class="bi bi-cpu"></i> Analisis Siklus Finansial (Gemini)
@@ -182,14 +177,14 @@
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0; font-size:1.05rem; color:#172d21;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
-        <button id="btnBukaTabungan" style="background:#e8f0ea; border:1px solid #cbd8d0; color:#1f4e38; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
+        <h3 style="margin:0; font-size:1.05rem; color:#163022;"><i class="bi bi-piggy-bank"></i> Pos Tabungan Khusus</h3>
+        <button id="btnBukaTabungan" style="background:#e8f3ec; border:1px solid #cce2d4; color:#1a432f; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">+ Pos Baru</button>
       </div>
       <div id="wadahPosTabungan">Belum ada pos tabungan.</div>
     </div>
 
     <div class="card">
-      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#172d21;"><i class="bi bi-bar-chart-line"></i> Rekap Dompet & Kewajiban</h3>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; color:#163022;"><i class="bi bi-bar-chart-line"></i> Rekap Dompet & Kewajiban</h3>
       <div class="list-item"><span><i class="bi bi-cash icon-tunai"></i> Kas Tunai</span> <span id="rep-tunai">Rp 0</span></div>
       <div class="list-item"><span><i class="bi bi-circle-fill icon-gopay"></i> Saldo GoPay</span> <span id="rep-gopay">Rp 0</span></div>
       <div class="list-item"><span><i class="bi bi-bank2 icon-mandiri"></i> Bank Mandiri</span> <span id="rep-mandiri">Rp 0</span></div>
@@ -202,8 +197,8 @@
   <div class="sheet-overlay" id="sheetSaldo">
     <div class="sheet-container">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px; color:#172d21;">
-          <i class="bi bi-sliders" style="color:#245e43;"></i> Pengaturan & Saldo
+        <h3 style="margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px; color:#163022;">
+          <i class="bi bi-sliders" style="color:#1a432f;"></i> Pengaturan & Saldo
         </h3>
         <button id="btnTutupSheet" style="background:none; border:none; font-size:1.3rem; color:#799484; cursor:pointer;">
           <i class="bi bi-x-lg"></i>
@@ -257,7 +252,6 @@
     </div>
   </div>
 
-  <!-- Memuat berkas JavaScript terpisah -->
   <script src="js/app.js"></script>
 </body>
 </html>
