@@ -3,6 +3,7 @@ let dompetTerpilih = 'tunai';
 let dompetHutangTerpilih = 'tunai';
 let kategoriTerpilih = 'Rokok & Kopi';
 let tipeHutangTerpilih = 'piutang';
+let nominalInputString = '';
 
 function bacaData(kunci, bawaan) {
   try {
@@ -35,6 +36,48 @@ function renderTampilanSaldo() {
   document.getElementById('saldo-tunai').innerText = 'Rp ' + Number(saldo.tunai || 0).toLocaleString('id-ID');
   document.getElementById('saldo-gopay').innerText = 'Rp ' + Number(saldo.gopay || 0).toLocaleString('id-ID');
   document.getElementById('saldo-mandiri').innerText = 'Rp ' + Number(saldo.mandiri || 0).toLocaleString('id-ID');
+}
+
+// LOGIKA DISPLAY KEYPAD NUMERIK
+function updateDisplayNominal() {
+  const elDisplay = document.getElementById('displayNominal');
+  if (!nominalInputString || nominalInputString === '0') {
+    elDisplay.innerText = 'Rp 0';
+  } else {
+    const val = parseInt(nominalInputString) || 0;
+    elDisplay.innerText = 'Rp ' + val.toLocaleString('id-ID');
+  }
+}
+
+function pasangKeypad() {
+  // Tombol Angka 0-9 dan 000
+  document.querySelectorAll('.btn-num').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const angka = this.getAttribute('data-num');
+      if (nominalInputString === '' && (angka === '0' || angka === '000')) return;
+      if (nominalInputString.length >= 9) return; // Batas maksimal 9 digit
+      nominalInputString += angka;
+      updateDisplayNominal();
+    });
+  });
+
+  // Tombol Cepat (+15k)
+  document.querySelectorAll('.btn-quick-tag').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tambah = parseInt(this.getAttribute('data-quick')) || 0;
+      const sekarang = parseInt(nominalInputString) || 0;
+      nominalInputString = (sekarang + tambah).toString();
+      updateDisplayNominal();
+    });
+  });
+
+  // Tombol Backspace (Hapus Digit)
+  document.getElementById('btnHapusDigit').addEventListener('click', function() {
+    if (nominalInputString.length > 0) {
+      nominalInputString = nominalInputString.slice(0, -1);
+      updateDisplayNominal();
+    }
+  });
 }
 
 function hitungBatasHarianOtomatis() {
@@ -137,25 +180,25 @@ function pasangNavigasi() {
 }
 
 function pasangPilihanDompet() {
-  document.querySelectorAll('#group-dompet .wallet-btn').forEach(btn => {
+  document.querySelectorAll('#group-dompet .wallet-pill').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('#group-dompet .wallet-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#group-dompet .wallet-pill').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       dompetTerpilih = this.getAttribute('data-val');
     });
   });
 
-  document.querySelectorAll('#group-dompet-ht .wallet-btn').forEach(btn => {
+  document.querySelectorAll('#group-dompet-ht .wallet-pill').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('#group-dompet-ht .wallet-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#group-dompet-ht .wallet-pill').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       dompetHutangTerpilih = this.getAttribute('data-val');
     });
   });
 
-  document.querySelectorAll('#group-tipe-ht .wallet-btn').forEach(btn => {
+  document.querySelectorAll('#group-tipe-ht .wallet-pill').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('#group-tipe-ht .wallet-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#group-tipe-ht .wallet-pill').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       tipeHutangTerpilih = this.getAttribute('data-tipe');
     });
@@ -163,19 +206,11 @@ function pasangPilihanDompet() {
 }
 
 function pasangPilihanKategori() {
-  document.querySelectorAll('#group-kategori .cat-btn').forEach(btn => {
+  document.querySelectorAll('#group-kategori .chip-kat').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('#group-kategori .cat-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#group-kategori .chip-kat').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       kategoriTerpilih = this.getAttribute('data-kat');
-    });
-  });
-}
-
-function pasangQuickNominal() {
-  document.querySelectorAll('.btn-quick').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.getElementById('inputNominal').value = this.getAttribute('data-nom');
     });
   });
 }
@@ -194,9 +229,8 @@ document.getElementById('btnInsentif').addEventListener('click', function() {
 });
 
 document.getElementById('btnSimpanPengeluaran').addEventListener('click', function() {
-  const inp = document.getElementById('inputNominal');
-  const nom = parseInt(inp.value);
-  if (!nom || nom <= 0) return alert('Silakan isi nominal pengeluaran.');
+  const nom = parseInt(nominalInputString);
+  if (!nom || nom <= 0) return alert('Silakan masukkan nominal pengeluaran melalui tombol angka.');
 
   const saldo = bacaData('artos_saldo', { tunai: 0, gopay: 0, mandiri: 0 });
   if ((saldo[dompetTerpilih] || 0) < nom) return alert('Saldo ' + dompetTerpilih.toUpperCase() + ' tidak cukup.');
@@ -208,7 +242,9 @@ document.getElementById('btnSimpanPengeluaran').addEventListener('click', functi
   logs.push({ jenis: 'Keluar', kategori: kategoriTerpilih, nominal: nom, dompet: dompetTerpilih, waktu: new Date().toISOString() });
   tulisData('catatan_uang', logs);
 
-  inp.value = '';
+  // Reset display nominal
+  nominalInputString = '';
+  updateDisplayNominal();
   renderTampilanSaldo();
   renderDasbor();
   alert('Pengeluaran berhasil dicatat.');
@@ -400,7 +436,7 @@ function renderLaporan() {
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <b>${p.nama}</b>
-            <div style="color:#245e43; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
+            <div style="color:#1a432f; font-weight:bold; font-size:0.95rem;">Rp ${p.saldo.toLocaleString('id-ID')}</div>
           </div>
         </div>
       `;
@@ -459,9 +495,6 @@ document.getElementById('btnKonsultasiGemini').addEventListener('click', async f
   const riwayat = bacaData('catatan_uang', []).slice(-30);
 
   const promptData = {
-    gajiBulanan: 2500000,
-    insentifHarian: 15000,
-    makanDanTempatTinggal: "Gratis dari perusahaan",
     saldoSaatIni: saldo,
     utangPiutangAktif: hutang,
     posTabunganTerkunci: tabungan,
@@ -469,36 +502,33 @@ document.getElementById('btnKonsultasiGemini').addEventListener('click', async f
     batasHarianSaatIni: batasHarianDinamis
   };
 
-  const systemPrompt = `Anda adalah konsultan keuangan pribadi cerdas bernama Artos AI. 
-Gunakan struktur kalimat baku yang jelas dan ringkas.
-Tugas Anda:
-1. Evaluasi kesehatan anggaran berdasarkan data keuangan yang diberikan.
-2. Jika ada utang, berikan strategi alokasi harian yang harus dipangkas agar utang segera lunas tanpa mengganggu kebutuhan primer.
-3. Berikan saran taktis mengenai uang bebas pakai dan pos tabungan.
-Balas langsung dalam poin-poin konkret maksimal 3 paragraf pendek.`;
+  const systemInstruction = "Anda adalah konsultan keuangan pribadi cerdas bernama Artos AI. Berikan evaluasi kondisi finansial, strategi alokasi harian untuk melunasi utang, dan saran pengelolaan uang bebas pakai dalam 2-3 paragraf ringkas.";
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
+          role: "user",
           parts: [
-            { text: systemPrompt },
-            { text: "Berikut data keuangan saya: " + JSON.stringify(promptData) }
+            { text: systemInstruction + "\n\nData keuangan: " + JSON.stringify(promptData) }
           ]
         }]
       })
     });
 
     const data = await response.json();
-    if (data.candidates && data.candidates[0].content) {
+    
+    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
       boxAI.innerText = data.candidates[0].content.parts[0].text;
+    } else if (data.error) {
+      boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Galat API:</b> ${data.error.message}</span>`;
     } else {
-      boxAI.innerText = 'Gagal memproses analisis: ' + (data.error ? data.error.message : 'Respon tidak valid.');
+      boxAI.innerHTML = `<span style="color:#b91c1c;">Format balasan server tidak dikenali.</span>`;
     }
   } catch (err) {
-    boxAI.innerText = 'Terjadi kendala jaringan saat menghubungi Gemini: ' + err.message;
+    boxAI.innerHTML = `<span style="color:#b91c1c;"><b>Kendala Jaringan:</b> ${err.message}.</span>`;
   }
 });
 
@@ -507,6 +537,6 @@ window.addEventListener('DOMContentLoaded', function() {
   pasangNavigasi();
   pasangPilihanDompet();
   pasangPilihanKategori();
-  pasangQuickNominal();
+  pasangKeypad();
   renderDasbor();
 });
