@@ -665,7 +665,7 @@ if (btnKonsultasiGemini) {
     const teksInstruksi = "Peran Anda adalah Artos AI, konsultan keuangan pribadi cerdas. Evaluasi kondisi keuangan berikut. Berikan saran alokasi pengeluaran harian, strategi pelunasan utang bila ada, dan cara menjaga kas bebas pakai dalam 2-3 paragraf ringkas:";
 
     // Model resmi dan stabil Google Generative Language
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
 
     try {
       const response = await fetch(url, {
