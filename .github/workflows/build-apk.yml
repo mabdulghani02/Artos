@@ -89,10 +89,9 @@ jobs:
               }
           }
           EOF
-
       - name: Daftarkan Skema artos:// ke AndroidManifest
         run: |
-          sed -i '/<category android:name="android.intent.category.LAUNCHER" \/>/a \                <action android:name="android.intent.action.VIEW" \/>\n                <category android:name="android.intent.category.DEFAULT" \/>\n                <category android:name="android.intent.category.BROWSABLE" \/>\n                <data android:scheme="artos" android:host="potong" \/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<\/activity>/i \            <intent-filter>\n                <action android:name="android.intent.action.VIEW" \/>\n                <category android:name="android.intent.category.DEFAULT" \/>\n                <category android:name="android.intent.category.BROWSABLE" \/>\n                <data android:scheme="artos" android:host="potong" \/>\n            <\/intent-filter>' android/app/src/main/AndroidManifest.xml
 
       - name: Kompilasi APK dengan Gradle
         run: |
